@@ -14,7 +14,7 @@ import cl.mpaz.mpazpro.ui.viewmodels.UtpViewModel
 object AppViewModelFactory {
     val Factory = viewModelFactory {
         initializer { LoginViewModel(app().repositorio) }
-        initializer { EstudianteViewModel(app().repositorio, app().vibracion, app().notificaciones) }
+        initializer { EstudianteViewModel(app().repositorio, app().vibracion, app().notificaciones, app().lectorVoz, app().fotoPerfil) }
         initializer { DocenteViewModel(app().repositorio) }
         initializer { UtpViewModel(app().repositorio) }
     }

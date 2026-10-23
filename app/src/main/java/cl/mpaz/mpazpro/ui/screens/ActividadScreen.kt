@@ -26,6 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,10 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cl.mpaz.mpazpro.domain.model.Logros
 import cl.mpaz.mpazpro.domain.model.TipoActividad
 import cl.mpaz.mpazpro.ui.components.BarraSuperior
+import cl.mpaz.mpazpro.ui.components.BotonAudio
 import cl.mpaz.mpazpro.ui.components.BotonPrincipal
 import cl.mpaz.mpazpro.ui.components.MensajeError
+import cl.mpaz.mpazpro.ui.theme.AmarilloPista
 import cl.mpaz.mpazpro.ui.theme.Verde
 import cl.mpaz.mpazpro.ui.viewmodels.EstudianteViewModel
 
@@ -52,6 +56,11 @@ fun ActividadScreen(viewModel: EstudianteViewModel, contenidoId: Int, tipo: Tipo
     val estado by viewModel.actividad.collectAsStateWithLifecycle()
     val preguntas by viewModel.preguntas.collectAsStateWithLifecycle()
     var confirmarFin by rememberSaveable { mutableStateOf(false) }
+    val hablando by viewModel.hablando.collectAsStateWithLifecycle()
+    val pista by viewModel.pista.collectAsStateWithLifecycle()
+
+    // al salir de la pantalla se corta la lectura en voz alta
+    DisposableEffect(Unit) { onDispose { viewModel.detenerVoz() } }
 
     val titulo = if (tipo == TipoActividad.DESAFIO) "Desafíos" else "Prueba final"
     Scaffold(topBar = { BarraSuperior(titulo, onVolver = onVolver) }) { innerPadding ->
@@ -70,6 +79,16 @@ fun ActividadScreen(viewModel: EstudianteViewModel, contenidoId: Int, tipo: Tipo
                     Text("Pregunta ${estado.indice + 1} de ${preguntas.size} · dificultad ${pregunta.dificultad}/3")
                     Text(pregunta.enunciado, style = MaterialTheme.typography.titleLarge)
 
+                    // Lectura en voz alta (TextToSpeech): pregunta + alternativas
+                    LaunchedEffect(estado.indice) { viewModel.detenerVoz() }
+                    BotonAudio(hablando = hablando, onClick = {
+                        val letras = listOf("A", "B", "C")
+                        val alternativas = pregunta.opciones().mapIndexed { i, o -> "Opción ${letras[i]}: $o" }
+                        viewModel.leerEnVozAlta(
+                            pregunta.enunciado.replace("___", "espacio en blanco") + ". " + alternativas.joinToString(". ")
+                        )
+                    })
+
 
                     pregunta.opciones().forEachIndexed { i, texto ->
                         Opcion(
@@ -81,6 +100,19 @@ fun ActividadScreen(viewModel: EstudianteViewModel, contenidoId: Int, tipo: Tipo
                         )
                     }
                     MensajeError(estado.errorSeleccion)
+
+                    // Pista con la explicación del objetivo (solo en desafíos, antes de comprobar)
+                    if (tipo == TipoActividad.DESAFIO && pista.isNotBlank() && !estado.comprobada) {
+                        var verPista by rememberSaveable(estado.indice) { mutableStateOf(false) }
+                        TextButton(onClick = { verPista = !verPista }) {
+                            Text(if (verPista) "Ocultar pista" else "💡 ¿Necesitas una pista?")
+                        }
+                        AnimatedVisibility(visible = verPista) {
+                            Surface(color = AmarilloPista, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+                                Text("💡 $pista", Modifier.padding(12.dp))
+                            }
+                        }
+                    }
 
 
                     AnimatedVisibility(visible = estado.comprobada) {
@@ -153,8 +185,10 @@ private fun Opcion(texto: String, elegida: Boolean, esCorrecta: Boolean, esIncor
 
 @Composable
 private fun Resultado(correctas: Int, total: Int, onVolver: () -> Unit) {
-    val porcentaje = if (total == 0) 0 else correctas * 100 / total
-    Text("$porcentaje%", style = MaterialTheme.typography.headlineSmall)
+    val porcentaje = Logros.porcentaje(correctas, total)
+    val estrellas = Logros.estrellas(porcentaje)
+    Text("⭐".repeat(estrellas) + "☆".repeat(3 - estrellas), style = MaterialTheme.typography.headlineSmall)
+    Text("$porcentaje% · ${Logros.mensaje(estrellas)}", style = MaterialTheme.typography.headlineSmall)
     Text("$correctas de $total respuestas correctas. Tu avance quedó guardado.")
     BotonPrincipal("Volver", onVolver)
 }

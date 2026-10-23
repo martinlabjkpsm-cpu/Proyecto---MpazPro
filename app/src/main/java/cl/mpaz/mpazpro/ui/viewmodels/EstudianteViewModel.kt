@@ -1,5 +1,6 @@
 package cl.mpaz.mpazpro.ui.viewmodels
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cl.mpaz.mpazpro.data.local.ContenidoEntity
@@ -8,7 +9,10 @@ import cl.mpaz.mpazpro.data.local.PreguntaEntity
 import cl.mpaz.mpazpro.data.repository.MPazRepository
 import cl.mpaz.mpazpro.domain.model.ActividadEstado
 import cl.mpaz.mpazpro.domain.model.Estado
+import cl.mpaz.mpazpro.domain.model.Logros
 import cl.mpaz.mpazpro.domain.model.TipoActividad
+import cl.mpaz.mpazpro.nativo.FotoPerfil
+import cl.mpaz.mpazpro.nativo.LectorVoz
 import cl.mpaz.mpazpro.nativo.Notificaciones
 import cl.mpaz.mpazpro.nativo.Vibracion
 import cl.mpaz.mpazpro.utils.Validaciones
@@ -26,7 +30,9 @@ import kotlinx.coroutines.launch
 class EstudianteViewModel(
     private val repo: MPazRepository,
     private val vibracion: Vibracion,
-    private val notificaciones: Notificaciones
+    private val notificaciones: Notificaciones,
+    private val lectorVoz: LectorVoz,
+    private val fotoPerfil: FotoPerfil
 ) : ViewModel() {
 
     val nombre: String = repo.usuarioActual?.nombre ?: ""
@@ -48,6 +54,33 @@ class EstudianteViewModel(
         intentos.count { it.contenidoId == contenidoId && it.tipo == TipoActividad.PRUEBA }
 
 
+    fun medallas(intentos: List<IntentoEntity>) = Logros.medallas(intentos)
+
+
+    // Foto de perfil (cámara nativa), se guarda por estudiante
+    private val _foto = MutableStateFlow<Bitmap?>(null)
+    val foto: StateFlow<Bitmap?> = _foto.asStateFlow()
+
+    init {
+        viewModelScope.launch { _foto.value = fotoPerfil.cargar(estudianteId) }
+    }
+
+    fun guardarFoto(nueva: Bitmap) {
+        _foto.value = nueva
+        viewModelScope.launch { fotoPerfil.guardar(estudianteId, nueva) }
+    }
+
+
+    // Lectura en voz alta (TextToSpeech)
+    val hablando: StateFlow<Boolean> = lectorVoz.hablando
+
+    fun leerEnVozAlta(texto: String) {
+        if (lectorVoz.hablando.value) lectorVoz.detener() else lectorVoz.leer(texto)
+    }
+
+    fun detenerVoz() = lectorVoz.detener()
+
+
     fun puedeRendirPrueba(c: ContenidoEntity, intentos: List<IntentoEntity>) =
         desafioHecho(c.id, intentos) && intentosUsados(c.id, intentos) < c.maxIntentos
 
@@ -57,6 +90,10 @@ class EstudianteViewModel(
     var tipoActual: TipoActividad = TipoActividad.DESAFIO
         private set
     private var contenidoActual: Int = 0
+
+    // Pista = explicación del objetivo, para los desafíos
+    private val _pista = MutableStateFlow("")
+    val pista: StateFlow<String> = _pista.asStateFlow()
 
     private val _actividad = MutableStateFlow(ActividadEstado())
     val actividad: StateFlow<ActividadEstado> = _actividad.asStateFlow()
@@ -72,6 +109,7 @@ class EstudianteViewModel(
         _preguntas.value = emptyList()
         viewModelScope.launch {
             _preguntas.value = repo.preguntas(contenidoId, tipo)
+            _pista.value = repo.contenido(contenidoId)?.explicacion ?: ""
         }
     }
 
@@ -119,5 +157,12 @@ class EstudianteViewModel(
         }
     }
 
-    fun cerrarSesion() = repo.cerrarSesion()
+    fun cerrarSesion() {
+        lectorVoz.detener()
+        repo.cerrarSesion()
+    }
+
+    override fun onCleared() {
+        lectorVoz.detener()
+    }
 }

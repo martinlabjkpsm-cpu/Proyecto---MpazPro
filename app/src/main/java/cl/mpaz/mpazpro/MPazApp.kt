@@ -5,6 +5,8 @@ import cl.mpaz.mpazpro.data.local.AppDatabase
 import cl.mpaz.mpazpro.data.local.DatosIniciales
 import cl.mpaz.mpazpro.data.local.PreferenciasDataStore
 import cl.mpaz.mpazpro.data.repository.MPazRepository
+import cl.mpaz.mpazpro.nativo.FotoPerfil
+import cl.mpaz.mpazpro.nativo.LectorVoz
 import cl.mpaz.mpazpro.nativo.Notificaciones
 import cl.mpaz.mpazpro.nativo.Vibracion
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +21,8 @@ class MPazApp : Application() {
     lateinit var repositorio: MPazRepository
     lateinit var vibracion: Vibracion
     lateinit var notificaciones: Notificaciones
+    lateinit var lectorVoz: LectorVoz
+    lateinit var fotoPerfil: FotoPerfil
 
     override fun onCreate() {
         super.onCreate()
@@ -27,6 +31,8 @@ class MPazApp : Application() {
         vibracion = Vibracion(this)
         notificaciones = Notificaciones(this)
         notificaciones.crearCanal()
+        lectorVoz = LectorVoz(this)
+        fotoPerfil = FotoPerfil(this)
 
         //carga datos ficticios
         CoroutineScope(Dispatchers.IO).launch { DatosIniciales.cargarSiEstaVacia(db.dao()) }

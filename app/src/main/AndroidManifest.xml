@@ -6,6 +6,19 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- La cámara es opcional: la foto de perfil usa la app de cámara del teléfono -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- Android 11+: permite encontrar el motor de voz y la app de cámara -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
     <application
         android:name=".MPazApp"
         android:allowBackup="false"
