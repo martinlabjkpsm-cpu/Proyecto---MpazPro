@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [UsuarioEntity::class, ContenidoEntity::class, PreguntaEntity::class,
         IntentoEntity::class, RespuestaEntity::class],
-    version = 1,
+    version = 2,   // v2: campos curriculares, fechas y opcionElegida
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

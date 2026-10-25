@@ -25,10 +25,13 @@ object DatosIniciales {
 
         val ma = dao.insertarContenido(
             ContenidoEntity(
-                asignatura = "Matemática", codigoOa = "MA03 OA 01",
+                asignatura = "Matemática", unidad = "Unidad 1: Números hasta 1 000", eje = "Números y operaciones",
+                codigoOa = "MA03 OA 01",
                 objetivo = "Contar números del 0 al 1 000 de 5 en 5, de 10 en 10 y de 100 en 100.",
                 explicacion = "Contar de 10 en 10 es como subir una escalera donde cada peldaño suma 10: " +
                         "120, 130, 140. De 100 en 100 cambian las centenas: 300, 400, 500.",
+                ejemplo = "Si cuento de 100 en 100 desde 200: 200, 300, 400, 500.",
+                recursoReferencia = "Currículum Nacional (Mineduc) – elaboración propia",
                 estado = Estado.APROBADO, asignado = true, maxIntentos = 3
             )
         ).toInt()
@@ -46,10 +49,13 @@ object DatosIniciales {
 
         val le = dao.insertarContenido(
             ContenidoEntity(
-                asignatura = "Lenguaje", codigoOa = "LE03 OA 04",
+                asignatura = "Lenguaje", unidad = "Unidad 1: Leer y comprender narraciones", eje = "Lectura",
+                codigoOa = "LE03 OA 04",
                 objetivo = "Comprender narraciones: personajes, ambiente y secuencia de acciones.",
                 explicacion = "Cuento: Tomás vivía junto al mar. Una noche de niebla la luz del faro no se veía, " +
                         "así que tocó la campana y los pescadores llegaron a salvo.",
+                ejemplo = "Personaje: Tomás. Ambiente: junto al mar, de noche. Problema: la niebla.",
+                recursoReferencia = "Currículum Nacional (Mineduc) – cuento de elaboración propia",
                 estado = Estado.APROBADO
             )
         ).toInt()
@@ -65,10 +71,13 @@ object DatosIniciales {
 
         val cn = dao.insertarContenido(
             ContenidoEntity(
-                asignatura = "Ciencias Naturales", codigoOa = "CN03 OA 08",
+                asignatura = "Ciencias Naturales", unidad = "Unidad 1: La luz", eje = "Ciencias físicas y químicas",
+                codigoOa = "CN03 OA 08",
                 objetivo = "Distinguir fuentes naturales y artificiales de luz.",
                 explicacion = "Las fuentes naturales no las fabrican las personas (Sol, estrellas). " +
                         "Las artificiales sí (ampolleta, linterna).",
+                ejemplo = "El fuego de una fogata es natural; la luz de un semáforo es artificial.",
+                recursoReferencia = "Currículum Nacional (Mineduc) – elaboración propia",
                 estado = Estado.APROBADO
             )
         ).toInt()
@@ -82,10 +91,13 @@ object DatosIniciales {
 
         val hi = dao.insertarContenido(
             ContenidoEntity(
-                asignatura = "Historia", codigoOa = "HI03 OA 06",
+                asignatura = "Historia", unidad = "Unidad 1: Ubicación espacial", eje = "Geografía",
+                codigoOa = "HI03 OA 06",
                 objetivo = "Ubicar lugares en una cuadrícula usando puntos cardinales.",
                 explicacion = "El Sol sale por el Este y se esconde por el Oeste. En una cuadrícula, " +
-                        "la letra indica la columna y el número la fila."
+                        "la letra indica la columna y el número la fila.",
+                ejemplo = "En la casilla B3 avanzo hasta la columna B y subo a la fila 3.",
+                recursoReferencia = "Currículum Nacional (Mineduc) – elaboración propia"
             )
         ).toInt()
         dao.insertarPreguntas(

@@ -22,15 +22,21 @@ data class UsuarioEntity(
 data class ContenidoEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val asignatura: String,           // "Matemática"
+    val unidad: String = "",          // NUEVO: "Unidad 1: Números hasta 1 000"
+    val eje: String = "",             // NUEVO: eje curricular
     val codigoOa: String,             // código oficial: "MA03 OA 01"
     val objetivo: String,             // descripción del OA
     val explicacion: String,          // material de apoyo (elaboración propia)
+    val ejemplo: String = "",         // NUEVO: ejemplo resuelto
+    val recursoReferencia: String = "", // NUEVO: "Currículum Nacional (Mineduc)"
     val estado: Estado = Estado.PENDIENTE,
     val observacionUtp: String = "",
     val asignado: Boolean = false,    // el docente lo dejó visible para el curso
     val maxIntentos: Int = 3,         // intentos de la prueba final (1 a 5)
     val informeValidado: Boolean = false,
-    val comentarioDocente: String = ""
+    val comentarioDocente: String = "",
+    val fechaValidacion: Long? = null, // NUEVO: fecha en que el docente validó el informe
+    val intentosAlValidar: Int = 0     // NUEVO: intentos que existían al validar
 )
 
 @Entity(tableName = "preguntas")
@@ -57,7 +63,8 @@ data class IntentoEntity(
     val contenidoId: Int,
     val tipo: TipoActividad,
     val correctas: Int,
-    val total: Int
+    val total: Int,
+    val fecha: Long = System.currentTimeMillis()   // NUEVO: cuándo se rindió
 )
 
 
@@ -66,5 +73,6 @@ data class RespuestaEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val intentoId: Int,
     val preguntaId: Int,
-    val esCorrecta: Boolean
+    val esCorrecta: Boolean,
+    val opcionElegida: Int = -1       // NUEVO: 0 = A, 1 = B, 2 = C, -1 = sin responder
 )

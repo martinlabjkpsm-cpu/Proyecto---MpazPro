@@ -7,11 +7,11 @@ import cl.mpaz.mpazpro.data.local.PreferenciasDataStore
 import cl.mpaz.mpazpro.data.local.PreguntaEntity
 import cl.mpaz.mpazpro.data.local.RespuestaEntity
 import cl.mpaz.mpazpro.data.local.UsuarioEntity
+import cl.mpaz.mpazpro.domain.model.Estado
 import cl.mpaz.mpazpro.domain.model.TipoActividad
 import kotlinx.coroutines.flow.Flow
 
 // El que habla con room y datastore.
-
 
 class MPazRepository(
     private val dao: AppDao,
@@ -58,7 +58,10 @@ class MPazRepository(
                 correctas = correctas, total = preguntas.size)
         ).toInt()
         dao.insertarRespuestas(
-            preguntas.mapIndexed { i, p -> RespuestaEntity(intentoId = intentoId, preguntaId = p.id, esCorrecta = elegidas[i] == p.correcta) }
+            preguntas.mapIndexed { i, p ->
+                RespuestaEntity(intentoId = intentoId, preguntaId = p.id,
+                    esCorrecta = elegidas[i] == p.correcta, opcionElegida = elegidas[i])   // NUEVO: guarda la alternativa
+            }
         )
     }
 
@@ -66,4 +69,28 @@ class MPazRepository(
     suspend fun estudiantes(): List<UsuarioEntity> = dao.estudiantes()
     suspend fun intentosPrueba(contenidoId: Int): List<IntentoEntity> = dao.intentosPrueba(contenidoId)
     suspend fun respuestasDe(intentoIds: List<Int>): List<RespuestaEntity> = dao.respuestasDe(intentoIds)
+
+
+    // ---------- NUEVO (v2) ----------
+
+    // Cuántas veces el estudiante actual rindió la prueba de un objetivo
+    suspend fun intentosPruebaUsados(contenidoId: Int): Int {
+        val e = usuarioActual ?: return 0
+        return dao.contarIntentosPrueba(e.id, contenidoId)
+    }
+
+    // Crear (id = 0) o editar un contenido. Devuelve el id.
+    suspend fun guardarContenido(c: ContenidoEntity): Int =
+        if (c.id == 0) dao.insertarContenido(c).toInt() else { dao.actualizarContenido(c); c.id }
+
+    suspend fun contenidosDe(asignatura: String): List<ContenidoEntity> = dao.contenidosDe(asignatura)
+    suspend fun todasLasPreguntas(contenidoId: Int): List<PreguntaEntity> = dao.todasLasPreguntas(contenidoId)
+    suspend fun agregarPregunta(p: PreguntaEntity): Long = dao.insertarPregunta(p)
+    suspend fun eliminarPregunta(p: PreguntaEntity) = dao.eliminarPregunta(p)
+
+    // Regla de negocio: cualquier cambio a un contenido exige nueva autorización UTP
+    suspend fun volverARevision(contenidoId: Int) {
+        val c = dao.buscarContenido(contenidoId) ?: return
+        dao.actualizarContenido(c.copy(estado = Estado.PENDIENTE, asignado = false))
+    }
 }

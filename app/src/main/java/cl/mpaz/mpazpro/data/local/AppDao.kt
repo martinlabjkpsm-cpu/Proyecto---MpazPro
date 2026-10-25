@@ -51,6 +51,18 @@ interface AppDao {
     @Query("DELETE FROM preguntas WHERE contenidoId = :contenidoId")
     suspend fun eliminarPreguntasDe(contenidoId: Int)                                 // D
 
+    @Insert
+    suspend fun insertarPregunta(pregunta: PreguntaEntity): Long                      // C
+
+    @Delete
+    suspend fun eliminarPregunta(pregunta: PreguntaEntity)                            // D
+
+    @Query("SELECT * FROM preguntas WHERE contenidoId = :contenidoId ORDER BY tipo, dificultad")
+    suspend fun todasLasPreguntas(contenidoId: Int): List<PreguntaEntity>             // R
+
+    @Query("SELECT * FROM contenidos WHERE asignatura = :asignatura")
+    suspend fun contenidosDe(asignatura: String): List<ContenidoEntity>               // R
+
 
     @Insert
     suspend fun insertarIntento(intento: IntentoEntity): Long                         // C
@@ -66,4 +78,7 @@ interface AppDao {
 
     @Query("SELECT * FROM respuestas WHERE intentoId IN (:intentoIds)")
     suspend fun respuestasDe(intentoIds: List<Int>): List<RespuestaEntity>            // R
+
+    @Query("SELECT COUNT(*) FROM intentos WHERE estudianteId = :estudianteId AND contenidoId = :contenidoId AND tipo = 'PRUEBA'")
+    suspend fun contarIntentosPrueba(estudianteId: Int, contenidoId: Int): Int        // R
 }
