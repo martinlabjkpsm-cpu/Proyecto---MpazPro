@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import cl.mpaz.mpazpro.domain.model.TipoActividad
 import cl.mpaz.mpazpro.ui.screens.ActividadScreen
 import cl.mpaz.mpazpro.ui.screens.AsignarScreen
+import cl.mpaz.mpazpro.ui.screens.ContenidoFormScreen
 import cl.mpaz.mpazpro.ui.screens.DocenteScreen
 import cl.mpaz.mpazpro.ui.screens.EstudianteScreen
 import cl.mpaz.mpazpro.ui.screens.InformeScreen
@@ -79,7 +80,15 @@ fun AppNavegacion(esTablet: Boolean) {
                 esTablet = esTablet,
                 onAsignar = { id -> navController.navigate(Rutas.asignar(id)) },
                 onInforme = { id -> navController.navigate(Rutas.informe(id)) },
+                onEditar = { id -> navController.navigate(Rutas.contenidoForm(id)) },
+                onNuevo = { navController.navigate(Rutas.contenidoForm(0)) },
                 onSalir = cerrarSesion
+            )
+        }
+        composable(Rutas.CONTENIDO_FORM, arguments = listOf(navArgument("contenidoId") { type = NavType.IntType })) { entrada ->
+            ContenidoFormScreen(
+                contenidoId = entrada.arguments?.getInt("contenidoId") ?: 0,
+                onVolver = { navController.popBackStack() }
             )
         }
         composable(Rutas.ASIGNAR, arguments = listOf(navArgument("contenidoId") { type = NavType.IntType })) { entrada ->

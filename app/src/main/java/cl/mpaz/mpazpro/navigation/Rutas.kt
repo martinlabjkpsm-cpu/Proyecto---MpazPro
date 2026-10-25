@@ -15,6 +15,8 @@ object Rutas {
     fun asignar(contenidoId: Int) = "docente/asignar/$contenidoId"
     const val INFORME = "docente/informe/{contenidoId}"
     fun informe(contenidoId: Int) = "docente/informe/$contenidoId"
+    const val CONTENIDO_FORM = "docente/contenido/{contenidoId}"
+    fun contenidoForm(contenidoId: Int = 0) = "docente/contenido/$contenidoId"   // 0 = nuevo
 
     const val UTP = "utp"
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import cl.mpaz.mpazpro.MPazApp
+import cl.mpaz.mpazpro.ui.viewmodels.ContenidoFormViewModel
 import cl.mpaz.mpazpro.ui.viewmodels.DocenteViewModel
 import cl.mpaz.mpazpro.ui.viewmodels.EstudianteViewModel
 import cl.mpaz.mpazpro.ui.viewmodels.LoginViewModel
@@ -17,6 +18,7 @@ object AppViewModelFactory {
         initializer { EstudianteViewModel(app().repositorio, app().vibracion, app().notificaciones, app().lectorVoz, app().fotoPerfil) }
         initializer { DocenteViewModel(app().repositorio) }
         initializer { UtpViewModel(app().repositorio) }
+        initializer { ContenidoFormViewModel(app().repositorio) }
     }
 }
 

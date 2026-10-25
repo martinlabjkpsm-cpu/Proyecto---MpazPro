@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import cl.mpaz.mpazpro.data.local.ContenidoEntity
 import cl.mpaz.mpazpro.data.repository.MPazRepository
 import cl.mpaz.mpazpro.domain.model.AsignarEstado
-import cl.mpaz.mpazpro.domain.model.Estado
 import cl.mpaz.mpazpro.domain.model.Informe
 import cl.mpaz.mpazpro.domain.model.LogroPregunta
 import cl.mpaz.mpazpro.domain.model.ResultadoEstudiante
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,8 +25,8 @@ class DocenteViewModel(private val repo: MPazRepository) : ViewModel() {
     val nombre: String = repo.usuarioActual?.nombre ?: ""
 
 
+    // El docente ve todos sus contenidos (pendientes, aprobados y rechazados con la observación UTP)
     val contenidos: StateFlow<List<ContenidoEntity>> = repo.contenidos()
-        .map { lista -> lista.filter { it.estado == Estado.APROBADO } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private var seleccionado: ContenidoEntity? = null
@@ -62,6 +60,13 @@ class DocenteViewModel(private val repo: MPazRepository) : ViewModel() {
         }
         val c = seleccionado ?: return
         viewModelScope.launch {
+            // No se puede dejar visible un objetivo sin desafíos ni prueba final
+            if (actual.asignado) {
+                Validaciones.preguntasMinimas(repo.todasLasPreguntas(c.id))?.let { msg ->
+                    _asignar.update { it.copy(errorIntentos = msg) }
+                    return@launch
+                }
+            }
             repo.actualizar(c.copy(maxIntentos = actual.intentos.toInt(), asignado = actual.asignado))   // [ROOM] Update
             _asignar.update { it.copy(guardado = true) }
         }
