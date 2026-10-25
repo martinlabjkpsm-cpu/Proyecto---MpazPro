@@ -10,6 +10,7 @@ import cl.mpaz.mpazpro.data.repository.MPazRepository
 import cl.mpaz.mpazpro.domain.model.ActividadEstado
 import cl.mpaz.mpazpro.domain.model.Estado
 import cl.mpaz.mpazpro.domain.model.Logros
+import cl.mpaz.mpazpro.domain.model.RevisionPregunta
 import cl.mpaz.mpazpro.domain.model.TipoActividad
 import cl.mpaz.mpazpro.nativo.FotoPerfil
 import cl.mpaz.mpazpro.nativo.LectorVoz
@@ -152,8 +153,24 @@ class EstudianteViewModel(
             repo.guardarIntento(contenidoActual, tipoActual, preguntas, respuestas)
             val correctas = preguntas.indices.count { respuestas[it] == preguntas[it].correcta }
 
+            // Revisión pregunta por pregunta (caso 4.1: reconocer respuestas correctas e incorrectas)
+            val revision = preguntas.mapIndexed { i, p ->
+                RevisionPregunta(p.enunciado, p.opciones(), respuestas[i], p.correcta, p.ayuda)
+            }
+
+            var restantes: Int? = null
+            var mostrar = true
+            if (tipoActual == TipoActividad.PRUEBA) {
+                val max = repo.contenido(contenidoActual)?.maxIntentos ?: 0
+                restantes = (max - repo.intentosPruebaUsados(contenidoActual)).coerceAtLeast(0)
+                mostrar = Logros.mostrarRespuestaCorrecta(Logros.porcentaje(correctas, preguntas.size), restantes)
+            }
+
             notificaciones.mostrar("¡Actividad terminada!", "$correctas de ${preguntas.size} correctas. Tu avance quedó guardado.")
-            _actividad.update { it.copy(terminada = true, correctas = correctas) }
+            _actividad.update {
+                it.copy(terminada = true, correctas = correctas, revision = revision,
+                    mostrarCorrectas = mostrar, intentosRestantes = restantes)
+            }
         }
     }
 

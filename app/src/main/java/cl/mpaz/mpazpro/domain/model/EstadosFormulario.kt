@@ -35,7 +35,10 @@ data class ActividadEstado(
     val comprobada: Boolean = false,
     val respuestas: List<Int> = emptyList(),
     val terminada: Boolean = false,
-    val correctas: Int = 0
+    val correctas: Int = 0,
+    val revision: List<RevisionPregunta> = emptyList(),   // respuestas para revisar al terminar
+    val mostrarCorrectas: Boolean = true,                  // si se revela la alternativa correcta
+    val intentosRestantes: Int? = null                     // solo en la prueba final
 )
 
 // Formulario Validación del informe (docente)

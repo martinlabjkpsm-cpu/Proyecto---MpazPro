@@ -33,4 +33,9 @@ object Logros {
             .map { it.contenidoId }
             .distinct()
             .size
+
+    // La respuesta correcta se revela si aprobó (70 % o más) o si ya usó todos sus intentos,
+    // así no se "regala" la respuesta para el siguiente intento.
+    fun mostrarRespuestaCorrecta(porcentaje: Int, intentosRestantes: Int): Boolean =
+        porcentaje >= 70 || intentosRestantes <= 0
 }

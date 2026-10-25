@@ -3,21 +3,29 @@ package cl.mpaz.mpazpro.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -30,13 +38,17 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cl.mpaz.mpazpro.domain.model.ActividadEstado
 import cl.mpaz.mpazpro.domain.model.Logros
+import cl.mpaz.mpazpro.domain.model.RevisionPregunta
 import cl.mpaz.mpazpro.domain.model.TipoActividad
 import cl.mpaz.mpazpro.ui.components.BarraSuperior
 import cl.mpaz.mpazpro.ui.components.BotonAudio
@@ -70,7 +82,7 @@ fun ActividadScreen(viewModel: EstudianteViewModel, contenidoId: Int, tipo: Tipo
         ) {
             val pregunta = preguntas.getOrNull(estado.indice)
             when {
-                estado.terminada -> Resultado(estado.correctas, preguntas.size, onVolver)
+                estado.terminada -> Resultado(estado, preguntas.size, onVolver)
                 pregunta == null -> CircularProgressIndicator()
                 else -> {
 
@@ -184,11 +196,65 @@ private fun Opcion(texto: String, elegida: Boolean, esCorrecta: Boolean, esIncor
 }
 
 @Composable
-private fun Resultado(correctas: Int, total: Int, onVolver: () -> Unit) {
-    val porcentaje = Logros.porcentaje(correctas, total)
+private fun Resultado(estado: ActividadEstado, total: Int, onVolver: () -> Unit) {
+    val porcentaje = Logros.porcentaje(estado.correctas, total)
     val estrellas = Logros.estrellas(porcentaje)
-    Text("⭐".repeat(estrellas) + "☆".repeat(3 - estrellas), style = MaterialTheme.typography.headlineSmall)
+
+    // Animación de celebración: las estrellas "rebotan" al aparecer
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    val escala by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.3f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "escalaEstrellas"
+    )
+    Text(
+        "⭐".repeat(estrellas) + "☆".repeat(3 - estrellas),
+        style = MaterialTheme.typography.headlineMedium,
+        modifier = Modifier.scale(escala)
+    )
     Text("$porcentaje% · ${Logros.mensaje(estrellas)}", style = MaterialTheme.typography.headlineSmall)
-    Text("$correctas de $total respuestas correctas. Tu avance quedó guardado.")
+    Text("${estado.correctas} de $total respuestas correctas. Tu avance quedó guardado.")
+    estado.intentosRestantes?.let { Text("Te quedan $it intento(s) de la prueba final.") }
+
+    if (estado.revision.isNotEmpty()) {
+        Text("Revisa tus respuestas", style = MaterialTheme.typography.titleMedium)
+        estado.revision.forEachIndexed { i, r -> TarjetaRevision(i + 1, r, estado.mostrarCorrectas) }
+        if (!estado.mostrarCorrectas) {
+            Text(
+                "Las respuestas correctas se mostrarán cuando apruebes o cuando uses todos tus intentos.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
     BotonPrincipal("Volver", onVolver)
+}
+
+// Tarjeta de revisión: verde si acertó, roja si se equivocó
+@Composable
+private fun TarjetaRevision(numero: Int, r: RevisionPregunta, mostrarCorrecta: Boolean) {
+    val letras = listOf("A", "B", "C")
+    val color = if (r.esCorrecta) Verde else MaterialTheme.colorScheme.error
+    Card(border = BorderStroke(2.dp, color), modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    if (r.esCorrecta) Icons.Filled.CheckCircle else Icons.Filled.Cancel,
+                    contentDescription = if (r.esCorrecta) "Respuesta correcta" else "Respuesta incorrecta",
+                    tint = color
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("$numero. ${r.enunciado}", style = MaterialTheme.typography.titleSmall)
+            }
+            if (r.elegida in r.opciones.indices) {
+                Text("Tu respuesta: ${letras[r.elegida]}) ${r.opciones[r.elegida]}")
+            } else {
+                Text("Sin responder")
+            }
+            if (!r.esCorrecta && mostrarCorrecta) {
+                Text("Respuesta correcta: ${letras[r.correcta]}) ${r.opciones[r.correcta]}", color = Verde)
+            }
+            if (mostrarCorrecta) Text("💡 ${r.ayuda}", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
 }
