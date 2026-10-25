@@ -16,7 +16,7 @@ object AppViewModelFactory {
     val Factory = viewModelFactory {
         initializer { LoginViewModel(app().repositorio) }
         initializer { EstudianteViewModel(app().repositorio, app().vibracion, app().notificaciones, app().lectorVoz, app().fotoPerfil) }
-        initializer { DocenteViewModel(app().repositorio) }
+        initializer { DocenteViewModel(app().repositorio, app().exportador) }
         initializer { UtpViewModel(app().repositorio) }
         initializer { ContenidoFormViewModel(app().repositorio) }
     }

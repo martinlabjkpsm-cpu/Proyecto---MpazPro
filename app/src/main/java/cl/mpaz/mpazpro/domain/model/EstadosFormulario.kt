@@ -51,7 +51,10 @@ data class ValidacionEstado(
     val revisado: Boolean = false,
     val errorComentario: String? = null,
     val errorRevisado: String? = null,
-    val validado: Boolean = false
+    val validado: Boolean = false,
+    val fechaValidacion: Long? = null,        // cuándo se validó
+    val intentosNuevos: Int = 0,              // intentos llegados después de validar
+    val mensajeExportacion: String? = null    // resultado de la descarga CSV
 )
 
 // Formulario Contenido (docente propone o corrige un objetivo)
