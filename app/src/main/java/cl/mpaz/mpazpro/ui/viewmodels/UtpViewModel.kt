@@ -28,6 +28,10 @@ class UtpViewModel(private val repo: MPazRepository) : ViewModel() {
 
     fun abrirRevision(contenido: ContenidoEntity) {
         _revision.value = RevisionEstado(contenidoId = contenido.id, observacion = contenido.observacionUtp)
+        viewModelScope.launch {
+            val preguntas = repo.todasLasPreguntas(contenido.id)
+            _revision.update { it.copy(preguntas = preguntas) }
+        }
     }
 
     fun cerrarRevision() {
@@ -49,9 +53,22 @@ class UtpViewModel(private val repo: MPazRepository) : ViewModel() {
             _revision.update { it.copy(errorObservacion = error) }
             return
         }
+        // Solo se aprueba si el contenido tiene desafíos y prueba final
+        if (nuevo == Estado.APROBADO) {
+            Validaciones.preguntasMinimas(actual.preguntas)?.let { msg ->
+                _revision.update { it.copy(errorAprobacion = "No se puede aprobar: $msg") }
+                return
+            }
+        }
         val c = contenidos.value.firstOrNull { it.id == actual.contenidoId } ?: return
         viewModelScope.launch {
-            repo.actualizar(c.copy(estado = nuevo, observacionUtp = actual.observacion.trim()))
+            // si se rechaza, se quita la asignación para que deje de verse en el curso
+            repo.actualizar(
+                c.copy(
+                    estado = nuevo, observacionUtp = actual.observacion.trim(),
+                    asignado = if (nuevo == Estado.APROBADO) c.asignado else false
+                )
+            )
             cerrarRevision()
         }
     }

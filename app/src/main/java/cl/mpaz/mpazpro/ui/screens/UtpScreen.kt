@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -29,6 +31,7 @@ import cl.mpaz.mpazpro.domain.model.Estado
 import cl.mpaz.mpazpro.ui.components.BarraSuperior
 import cl.mpaz.mpazpro.ui.components.CampoValidado
 import cl.mpaz.mpazpro.ui.components.EtiquetaEstado
+import cl.mpaz.mpazpro.ui.components.MensajeError
 import cl.mpaz.mpazpro.ui.theme.Ambar
 import cl.mpaz.mpazpro.ui.theme.Rojo
 import cl.mpaz.mpazpro.ui.theme.Verde
@@ -57,7 +60,13 @@ fun UtpScreen(
                 Card {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text("${c.asignatura} · ${c.codigoOa}", style = MaterialTheme.typography.titleMedium)
-                        Text(c.explicacion)
+                        if (c.unidad.isNotBlank()) {
+                            Text("${c.unidad} · Eje: ${c.eje}", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Text(c.objetivo)
+                        if (c.recursoReferencia.isNotBlank()) {
+                            Text("Referencia: ${c.recursoReferencia}", style = MaterialTheme.typography.bodySmall)
+                        }
                         when (c.estado) {
                             Estado.PENDIENTE -> EtiquetaEstado("Pendiente", Ambar)
                             Estado.APROBADO -> EtiquetaEstado("Aprobado", Verde)
@@ -80,8 +89,25 @@ fun UtpScreen(
             onDismissRequest = viewModel::cerrarRevision,
             title = { Text("Revisar contenido") },
             text = {
-                CampoValidado(revision.observacion, viewModel::onObservacionCambia, "Observación (obligatoria si rechazas)",
-                    Icons.Filled.RateReview, revision.errorObservacion, lineas = 3)
+                val c = contenidos.firstOrNull { it.id == revision.contenidoId }
+                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (c != null) {
+                        Text(c.objetivo, style = MaterialTheme.typography.titleSmall)
+                        Text(c.explicacion)
+                        if (c.ejemplo.isNotBlank()) Text("Ejemplo: ${c.ejemplo}")
+                    }
+                    Text("Preguntas (${revision.preguntas.size})", style = MaterialTheme.typography.titleSmall)
+                    val letras = listOf("A", "B", "C")
+                    revision.preguntas.forEach { q ->
+                        Text(
+                            "• [${q.tipo.name.lowercase()} · nivel ${q.dificultad}] ${q.enunciado} " +
+                                    "→ correcta: ${letras[q.correcta]}) ${q.opciones()[q.correcta]}"
+                        )
+                    }
+                    MensajeError(revision.errorAprobacion)
+                    CampoValidado(revision.observacion, viewModel::onObservacionCambia, "Observación (obligatoria si rechazas)",
+                        Icons.Filled.RateReview, revision.errorObservacion, lineas = 3)
+                }
             },
             confirmButton = { Button(onClick = viewModel::aprobar) { Text("Aprobar") } },
             dismissButton = { TextButton(onClick = viewModel::rechazar) { Text("Rechazar") } }

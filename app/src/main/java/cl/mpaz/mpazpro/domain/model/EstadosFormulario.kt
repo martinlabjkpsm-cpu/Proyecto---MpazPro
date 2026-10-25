@@ -1,5 +1,7 @@
 package cl.mpaz.mpazpro.domain.model
 
+import cl.mpaz.mpazpro.data.local.PreguntaEntity
+
 // Formulario Login
 data class LoginEstado(
     val usuario: String = "",
@@ -24,7 +26,9 @@ data class AsignarEstado(
 data class RevisionEstado(
     val contenidoId: Int? = null,
     val observacion: String = "",
-    val errorObservacion: String? = null
+    val errorObservacion: String? = null,
+    val preguntas: List<PreguntaEntity> = emptyList(),   // la UTP revisa también las preguntas
+    val errorAprobacion: String? = null                   // no se aprueba un contenido incompleto
 )
 
 // Formulario  Responder una pregunta (estudiante)
