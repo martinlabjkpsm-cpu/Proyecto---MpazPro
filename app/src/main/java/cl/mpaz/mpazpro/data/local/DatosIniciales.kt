@@ -4,14 +4,19 @@ import cl.mpaz.mpazpro.domain.model.Estado
 import cl.mpaz.mpazpro.domain.model.Rol
 import cl.mpaz.mpazpro.domain.model.TipoActividad.DESAFIO
 import cl.mpaz.mpazpro.domain.model.TipoActividad.PRUEBA
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 // Datos ficticios que se cargan la primera vez que se abre la app.
 // Una unidad por asignatura, como exige el caso. Contenidos de elaboración propia.
 
 object DatosIniciales {
 
-    suspend fun cargarSiEstaVacia(dao: AppDao) {
-        if (dao.contarUsuarios() > 0) return
+    // Evita que la carga se ejecute dos veces a la vez (al abrir la app y al iniciar sesión)
+    private val mutex = Mutex()
+
+    suspend fun cargarSiEstaVacia(dao: AppDao) = mutex.withLock {
+        if (dao.contarUsuarios() > 0) return@withLock
 
         dao.insertarUsuarios(
             listOf(

@@ -2,6 +2,7 @@ package cl.mpaz.mpazpro.data.repository
 
 import cl.mpaz.mpazpro.data.local.AppDao
 import cl.mpaz.mpazpro.data.local.ContenidoEntity
+import cl.mpaz.mpazpro.data.local.DatosIniciales
 import cl.mpaz.mpazpro.data.local.IntentoEntity
 import cl.mpaz.mpazpro.data.local.PreferenciasDataStore
 import cl.mpaz.mpazpro.data.local.PreguntaEntity
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 
 // El que habla con room y datastore.
 
+
 class MPazRepository(
     private val dao: AppDao,
     private val preferencias: PreferenciasDataStore
@@ -23,6 +25,7 @@ class MPazRepository(
 
 
     suspend fun iniciarSesion(usuario: String, pin: String): UsuarioEntity? {
+        DatosIniciales.cargarSiEstaVacia(dao)       // garantiza que existan los usuarios de prueba
         val encontrado = dao.buscarUsuario(usuario, pin)
         usuarioActual = encontrado
         return encontrado

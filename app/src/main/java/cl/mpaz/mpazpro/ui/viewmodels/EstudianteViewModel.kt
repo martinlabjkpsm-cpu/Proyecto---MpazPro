@@ -96,6 +96,10 @@ class EstudianteViewModel(
     private val _pista = MutableStateFlow("")
     val pista: StateFlow<String> = _pista.asStateFlow()
 
+    // true mientras se cargan las preguntas (distingue "cargando" de "sin preguntas")
+    private val _cargando = MutableStateFlow(false)
+    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
+
     private val _actividad = MutableStateFlow(ActividadEstado())
     val actividad: StateFlow<ActividadEstado> = _actividad.asStateFlow()
 
@@ -109,8 +113,10 @@ class EstudianteViewModel(
         _actividad.value = ActividadEstado()
         _preguntas.value = emptyList()
         viewModelScope.launch {
+            _cargando.value = true
             _preguntas.value = repo.preguntas(contenidoId, tipo)
             _pista.value = repo.contenido(contenidoId)?.explicacion ?: ""
+            _cargando.value = false
         }
     }
 
@@ -172,6 +178,17 @@ class EstudianteViewModel(
                     mostrarCorrectas = mostrar, intentosRestantes = restantes)
             }
         }
+    }
+
+    // Si el estudiante sale de la prueba sin terminar, se registra el intento
+    // (las preguntas sin responder cuentan como incorrectas). Evita ver la prueba sin gastar intento.
+    fun abandonarPrueba() {
+        val a = _actividad.value
+        val preguntas = _preguntas.value
+        if (tipoActual != TipoActividad.PRUEBA || a.terminada || preguntas.isEmpty()) return
+        val respuestas = a.respuestas + List(preguntas.size - a.respuestas.size) { -1 }
+        viewModelScope.launch { repo.guardarIntento(contenidoActual, tipoActual, preguntas, respuestas) }
+        _actividad.value = ActividadEstado(terminada = true)
     }
 
     fun cerrarSesion() {

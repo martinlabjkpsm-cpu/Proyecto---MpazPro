@@ -1,5 +1,6 @@
 package cl.mpaz.mpazpro.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -70,12 +71,19 @@ fun ActividadScreen(viewModel: EstudianteViewModel, contenidoId: Int, tipo: Tipo
     var confirmarFin by rememberSaveable { mutableStateOf(false) }
     val hablando by viewModel.hablando.collectAsStateWithLifecycle()
     val pista by viewModel.pista.collectAsStateWithLifecycle()
+    val cargando by viewModel.cargando.collectAsStateWithLifecycle()
+
+    // Salir de la prueba sin terminar pide confirmación (se usará un intento)
+    var confirmarSalida by rememberSaveable { mutableStateOf(false) }
+    val enPrueba = tipo == TipoActividad.PRUEBA && !estado.terminada && preguntas.isNotEmpty()
+    BackHandler(enabled = enPrueba) { confirmarSalida = true }
+    val volver: () -> Unit = { if (enPrueba) confirmarSalida = true else onVolver() }
 
     // al salir de la pantalla se corta la lectura en voz alta
     DisposableEffect(Unit) { onDispose { viewModel.detenerVoz() } }
 
     val titulo = if (tipo == TipoActividad.DESAFIO) "Desafíos" else "Prueba final"
-    Scaffold(topBar = { BarraSuperior(titulo, onVolver = onVolver) }) { innerPadding ->
+    Scaffold(topBar = { BarraSuperior(titulo, onVolver = volver) }) { innerPadding ->
         Column(
             Modifier.padding(innerPadding).fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -83,7 +91,8 @@ fun ActividadScreen(viewModel: EstudianteViewModel, contenidoId: Int, tipo: Tipo
             val pregunta = preguntas.getOrNull(estado.indice)
             when {
                 estado.terminada -> Resultado(estado, preguntas.size, onVolver)
-                pregunta == null -> CircularProgressIndicator()
+                cargando -> CircularProgressIndicator()
+                pregunta == null -> Text("Esta actividad todavía no tiene preguntas. Avísale a tu profesor(a).")
                 else -> {
 
                     val progreso by animateFloatAsState(estado.indice.toFloat() / preguntas.size, label = "progreso")
@@ -167,6 +176,24 @@ fun ActividadScreen(viewModel: EstudianteViewModel, contenidoId: Int, tipo: Tipo
             dismissButton = { TextButton(onClick = { confirmarFin = false }) { Text("Revisar") } }
         )
     }
+
+    if (confirmarSalida) {
+        DialogoSalida(
+            onSalir = { confirmarSalida = false; viewModel.abandonarPrueba(); onVolver() },
+            onQuedarse = { confirmarSalida = false }
+        )
+    }
+}
+
+@Composable
+private fun DialogoSalida(onSalir: () -> Unit, onQuedarse: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onQuedarse,
+        title = { Text("¿Salir de la prueba?") },
+        text = { Text("Si sales ahora se usará 1 intento y las preguntas sin responder contarán como incorrectas.") },
+        confirmButton = { Button(onClick = onSalir) { Text("Salir") } },
+        dismissButton = { TextButton(onClick = onQuedarse) { Text("Seguir respondiendo") } }
+    )
 }
 
 @Composable
