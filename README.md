@@ -83,6 +83,23 @@ Estrategia híbrida de la Guía 15: **Kotest** para la lógica, **MockK** para s
   recursos nativos reales y pruebas de interfaz con Compose. Los componentes probados tienen `testTag`
   (`ui/components/TagsPrueba.kt`).
 
+  ### Cobertura de pruebas
+Se ejecutaron 129 pruebas unitarias (todas aprobadas). El 80 % se mide sobre la lógica de la app:
+
+| Módulo | Cobertura de líneas |
+|---|---|
+| ViewModels | 97 % |
+| Repository | 100 % |
+| Domain model | 100 % |
+| Utils | 100 % |
+
+Las pantallas Compose se prueban aparte con Compose UI Test (androidTest).
+<img width="2056" height="1594" alt="image" src="https://github.com/user-attachments/assets/4b3c6090-22a8-4e3f-bfad-ea0c90ea283e" />
+
+<img width="2040" height="1154" alt="image" src="https://github.com/user-attachments/assets/c677093f-211a-4d1f-94fc-50ef17a35961" />
+
+
+
 | Caso de uso | Perfil | Clase de prueba | Herramientas |
 |---|---|---|---|
 | CU01 Iniciar y cerrar sesión según perfil, recordar usuario | Todos | `CU01IniciarSesionTest` | Kotest + MockK + coroutines-test |
