@@ -32,13 +32,14 @@ MVP académico: todos los usuarios, respuestas y resultados son ficticios.
 - Imágenes de apoyo de elaboración propia por objetivo.
 
 ## Arquitectura
-MVVM con separación por capas:
+MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2` (grupo 2):
 - `data/local`: Room (usuarios, contenidos, preguntas, intentos, respuestas) y DataStore
 - `data/repository`: acceso centralizado a los datos
 - `domain/model`: modelos y reglas (logros, informe, revisión, estados de formularios)
 - `ui/screens` y `ui/viewmodels`: vistas en Compose y su estado con StateFlow
 - `utils`: validaciones desacopladas de la interfaz y formato de fechas
 - `nativo`: recursos del dispositivo
+- `di`: fábrica de ViewModels con sus dependencias
 
 ## Recursos nativos
 - **Vibración:** retroalimentación al acertar o fallar.

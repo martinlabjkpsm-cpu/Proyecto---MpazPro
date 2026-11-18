@@ -1,0 +1,26 @@
+package cl.mpaz.mpazpro.grupo_2.di
+
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import cl.mpaz.mpazpro.grupo_2.MPazApp
+import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.ContenidoFormViewModel
+import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.DocenteViewModel
+import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.EstudianteViewModel
+import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.LoginViewModel
+import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.UtpViewModel
+
+
+object AppViewModelFactory {
+    val Factory = viewModelFactory {
+        initializer { LoginViewModel(app().repositorio) }
+        initializer { EstudianteViewModel(app().repositorio, app().vibracion, app().notificaciones, app().lectorVoz, app().fotoPerfil) }
+        initializer { DocenteViewModel(app().repositorio, app().exportador) }
+        initializer { UtpViewModel(app().repositorio) }
+        initializer { ContenidoFormViewModel(app().repositorio) }
+    }
+}
+
+private fun CreationExtras.app(): MPazApp =
+    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MPazApp
