@@ -12,7 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 //recurso nativo de notificaciones. informa al estudiante que la actividad termino
 
-class Notificaciones(private val context: Context) {
+class Notificaciones(private val context: Context) : ServicioAvisos {
 
     private val canalId = "actividades"
 
@@ -28,7 +28,7 @@ class Notificaciones(private val context: Context) {
                 PackageManager.PERMISSION_GRANTED
 
     @SuppressLint("MissingPermission") // el permiso se revisa en la primera línea
-    fun mostrar(titulo: String, texto: String) {
+    override fun mostrar(titulo: String, texto: String) {
         if (!tienePermiso()) return   //  sin permiso, no se intenta notificar
         val notificacion = NotificationCompat.Builder(context, canalId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)

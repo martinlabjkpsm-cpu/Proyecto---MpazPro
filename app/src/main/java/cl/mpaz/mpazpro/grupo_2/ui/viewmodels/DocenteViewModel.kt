@@ -13,7 +13,7 @@ import cl.mpaz.mpazpro.grupo_2.domain.model.ResultadoEstudiante
 import cl.mpaz.mpazpro.grupo_2.domain.model.TipoActividad
 import cl.mpaz.mpazpro.grupo_2.domain.model.ValidacionEstado
 import cl.mpaz.mpazpro.grupo_2.domain.model.aCsv
-import cl.mpaz.mpazpro.grupo_2.nativo.ExportadorCsv
+import cl.mpaz.mpazpro.grupo_2.nativo.ServicioExportacion
 import cl.mpaz.mpazpro.grupo_2.utils.Fechas
 import cl.mpaz.mpazpro.grupo_2.utils.Validaciones
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 
 class DocenteViewModel(
     private val repo: MPazRepository,
-    private val exportador: ExportadorCsv
+    private val exportador: ServicioExportacion
 ) : ViewModel() {
 
     val nombre: String = repo.usuarioActual?.nombre ?: ""

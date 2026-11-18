@@ -4,7 +4,7 @@ import cl.mpaz.mpazpro.grupo_2.data.local.AppDao
 import cl.mpaz.mpazpro.grupo_2.data.local.ContenidoEntity
 import cl.mpaz.mpazpro.grupo_2.data.local.DatosIniciales
 import cl.mpaz.mpazpro.grupo_2.data.local.IntentoEntity
-import cl.mpaz.mpazpro.grupo_2.data.local.PreferenciasDataStore
+import cl.mpaz.mpazpro.grupo_2.data.local.Preferencias
 import cl.mpaz.mpazpro.grupo_2.data.local.PreguntaEntity
 import cl.mpaz.mpazpro.grupo_2.data.local.RespuestaEntity
 import cl.mpaz.mpazpro.grupo_2.data.local.UsuarioEntity
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 
 class MPazRepository(
     private val dao: AppDao,
-    private val preferencias: PreferenciasDataStore
+    private val preferencias: Preferencias
 ) {
 
     var usuarioActual: UsuarioEntity? = null

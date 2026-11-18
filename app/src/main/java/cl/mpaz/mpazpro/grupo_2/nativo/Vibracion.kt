@@ -9,7 +9,7 @@ import android.os.VibratorManager
 // Recurso nativo de vibracion. cada ves que acerta vibra corto, si se equivoca doble.
 
 
-class Vibracion(context: Context) {
+class Vibracion(context: Context) : ServicioVibracion {
 
     private val vibrador: Vibrator =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -18,12 +18,12 @@ class Vibracion(context: Context) {
             @Suppress("DEPRECATION") (context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator)
         }
 
-    fun correcto() {
+    override fun correcto() {
         if (!vibrador.hasVibrator()) return
         vibrador.vibrate(VibrationEffect.createOneShot(80, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
-    fun incorrecto() {
+    override fun incorrecto() {
         if (!vibrador.hasVibrator()) return
         vibrador.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 120, 80, 120), -1))
     }

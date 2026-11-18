@@ -11,13 +11,13 @@ import java.util.Locale
 // Recurso nativo de texto a voz (TextToSpeech). Lee en voz alta las preguntas,
 // pensado para estudiantes de 3.º básico que aún están afianzando la lectura.
 
-class LectorVoz(context: Context) : TextToSpeech.OnInitListener {
+class LectorVoz(context: Context) : TextToSpeech.OnInitListener, ServicioVoz {
 
     private val tts = TextToSpeech(context.applicationContext, this)
     private var listo = false
 
     private val _hablando = MutableStateFlow(false)
-    val hablando: StateFlow<Boolean> = _hablando.asStateFlow()
+    override val hablando: StateFlow<Boolean> = _hablando.asStateFlow()
 
     override fun onInit(status: Int) {
         if (status != TextToSpeech.SUCCESS) return
@@ -35,12 +35,12 @@ class LectorVoz(context: Context) : TextToSpeech.OnInitListener {
         listo = true
     }
 
-    fun leer(texto: String) {
+    override fun leer(texto: String) {
         if (!listo) return
         tts.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "mpaz_lectura")
     }
 
-    fun detener() {
+    override fun detener() {
         if (listo) tts.stop()
         _hablando.value = false
     }

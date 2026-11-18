@@ -8,9 +8,9 @@ import kotlinx.coroutines.withContext
 // Recurso nativo de almacenamiento (Storage Access Framework): el docente elige dónde guardar
 // el informe con el selector de archivos del sistema. No requiere permisos de almacenamiento.
 
-class ExportadorCsv(private val context: Context) {
+class ExportadorCsv(private val context: Context) : ServicioExportacion {
 
-    suspend fun escribir(uri: Uri, contenido: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun escribir(uri: Uri, contenido: String): Boolean = withContext(Dispatchers.IO) {
         runCatching {
             val salida = context.contentResolver.openOutputStream(uri) ?: error("No se pudo abrir el archivo")
             // BOM UTF-8 para que Excel muestre bien las tildes

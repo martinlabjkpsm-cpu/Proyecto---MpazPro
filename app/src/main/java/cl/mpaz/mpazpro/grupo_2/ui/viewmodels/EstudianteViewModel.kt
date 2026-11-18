@@ -12,10 +12,10 @@ import cl.mpaz.mpazpro.grupo_2.domain.model.Estado
 import cl.mpaz.mpazpro.grupo_2.domain.model.Logros
 import cl.mpaz.mpazpro.grupo_2.domain.model.RevisionPregunta
 import cl.mpaz.mpazpro.grupo_2.domain.model.TipoActividad
-import cl.mpaz.mpazpro.grupo_2.nativo.FotoPerfil
-import cl.mpaz.mpazpro.grupo_2.nativo.LectorVoz
-import cl.mpaz.mpazpro.grupo_2.nativo.Notificaciones
-import cl.mpaz.mpazpro.grupo_2.nativo.Vibracion
+import cl.mpaz.mpazpro.grupo_2.nativo.ServicioAvisos
+import cl.mpaz.mpazpro.grupo_2.nativo.ServicioFoto
+import cl.mpaz.mpazpro.grupo_2.nativo.ServicioVibracion
+import cl.mpaz.mpazpro.grupo_2.nativo.ServicioVoz
 import cl.mpaz.mpazpro.grupo_2.utils.Validaciones
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,10 +30,10 @@ import kotlinx.coroutines.launch
 
 class EstudianteViewModel(
     private val repo: MPazRepository,
-    private val vibracion: Vibracion,
-    private val notificaciones: Notificaciones,
-    private val lectorVoz: LectorVoz,
-    private val fotoPerfil: FotoPerfil
+    private val vibracion: ServicioVibracion,
+    private val notificaciones: ServicioAvisos,
+    private val lectorVoz: ServicioVoz,
+    private val fotoPerfil: ServicioFoto
 ) : ViewModel() {
 
     val nombre: String = repo.usuarioActual?.nombre ?: ""

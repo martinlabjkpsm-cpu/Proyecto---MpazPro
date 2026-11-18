@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -71,7 +72,8 @@ fun CampoValidado(
     error: String?,
     esPin: Boolean = false,
     soloNumeros: Boolean = false,
-    lineas: Int = 1
+    lineas: Int = 1,
+    modifier: Modifier = Modifier
 ) {
     Column(Modifier.fillMaxWidth()) {
         OutlinedTextField(
@@ -90,7 +92,7 @@ fun CampoValidado(
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (esPin) KeyboardType.NumberPassword else if (soloNumeros) KeyboardType.Number else KeyboardType.Text
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth()
         )
         MensajeError(error)
     }
@@ -104,17 +106,20 @@ fun MensajeError(error: String?) {
             text = "⚠ " + (error ?: ""),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(start = 12.dp, top = 4.dp)
+            modifier = Modifier.padding(start = 12.dp, top = 4.dp).testTag(TagsPrueba.CAMPO_ERROR)
         )
     }
 }
 
 @Composable
-fun BotonPrincipal(texto: String, onClick: () -> Unit, cargando: Boolean = false, habilitado: Boolean = true) {
+fun BotonPrincipal(
+    texto: String, onClick: () -> Unit, cargando: Boolean = false, habilitado: Boolean = true,
+    modifier: Modifier = Modifier
+) {
     Button(
         onClick = onClick,
         enabled = habilitado && !cargando,
-        modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp)
+        modifier = modifier.fillMaxWidth().heightIn(min = 54.dp)
     ) {
         if (cargando) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
         else Text(texto, style = MaterialTheme.typography.labelLarge)

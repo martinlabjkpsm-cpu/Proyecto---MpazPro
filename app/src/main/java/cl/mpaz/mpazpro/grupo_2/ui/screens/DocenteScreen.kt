@@ -28,11 +28,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.mpaz.mpazpro.grupo_2.di.AppViewModelFactory
 import cl.mpaz.mpazpro.grupo_2.domain.model.Estado
+import cl.mpaz.mpazpro.grupo_2.ui.components.TagsPrueba
 import cl.mpaz.mpazpro.grupo_2.ui.components.BarraSuperior
 import cl.mpaz.mpazpro.grupo_2.ui.components.EtiquetaEstado
 import cl.mpaz.mpazpro.grupo_2.ui.theme.Ambar
@@ -63,6 +65,7 @@ fun DocenteScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNuevo,
+                modifier = Modifier.testTag(TagsPrueba.DOCENTE_NUEVO),
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                 text = { Text("Nuevo contenido") }
             )
@@ -93,11 +96,14 @@ fun DocenteScreen(
                         }
                         if (c.informeValidado) EtiquetaEstado("Informe validado", Verde)
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { onAsignar(c.id) }, enabled = c.estado == Estado.APROBADO) { Text("Asignar") }
-                            OutlinedButton(onClick = { onInforme(c.id) }, enabled = c.estado == Estado.APROBADO) { Text("Informe") }
-                            TextButton(onClick = {
-                                if (c.estado == Estado.APROBADO) confirmarEdicion = c.id else onEditar(c.id)
-                            }) { Text("Editar") }
+                            Button(onClick = { onAsignar(c.id) }, enabled = c.estado == Estado.APROBADO,
+                                modifier = Modifier.testTag(TagsPrueba.DOCENTE_ASIGNAR)) { Text("Asignar") }
+                            OutlinedButton(onClick = { onInforme(c.id) }, enabled = c.estado == Estado.APROBADO,
+                                modifier = Modifier.testTag(TagsPrueba.DOCENTE_INFORME)) { Text("Informe") }
+                            TextButton(
+                                onClick = { if (c.estado == Estado.APROBADO) confirmarEdicion = c.id else onEditar(c.id) },
+                                modifier = Modifier.testTag(TagsPrueba.DOCENTE_EDITAR)
+                            ) { Text("Editar") }
                         }
                     }
                 }

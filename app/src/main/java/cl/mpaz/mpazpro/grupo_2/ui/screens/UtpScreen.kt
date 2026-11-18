@@ -24,10 +24,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.mpaz.mpazpro.grupo_2.domain.model.Estado
+import cl.mpaz.mpazpro.grupo_2.ui.components.TagsPrueba
 import cl.mpaz.mpazpro.grupo_2.ui.components.BarraSuperior
 import cl.mpaz.mpazpro.grupo_2.ui.components.CampoValidado
 import cl.mpaz.mpazpro.grupo_2.ui.components.EtiquetaEstado
@@ -73,7 +75,7 @@ fun UtpScreen(
                             Estado.RECHAZADO -> EtiquetaEstado("Rechazado: ${c.observacionUtp}", Rojo)
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { viewModel.abrirRevision(c) }) { Text("Revisar") }
+                            Button(onClick = { viewModel.abrirRevision(c) }, modifier = Modifier.testTag(TagsPrueba.UTP_REVISAR)) { Text("Revisar") }
                             if (c.estado == Estado.RECHAZADO) {
                                 OutlinedButton(onClick = { viewModel.eliminar(c) }) { Text("Eliminar") }
                             }
@@ -109,8 +111,8 @@ fun UtpScreen(
                         Icons.Filled.RateReview, revision.errorObservacion, lineas = 3)
                 }
             },
-            confirmButton = { Button(onClick = viewModel::aprobar) { Text("Aprobar") } },
-            dismissButton = { TextButton(onClick = viewModel::rechazar) { Text("Rechazar") } }
+            confirmButton = { Button(onClick = viewModel::aprobar, modifier = Modifier.testTag(TagsPrueba.UTP_APROBAR)) { Text("Aprobar") } },
+            dismissButton = { TextButton(onClick = viewModel::rechazar, modifier = Modifier.testTag(TagsPrueba.UTP_RECHAZAR)) { Text("Rechazar") } }
         )
     }
 }

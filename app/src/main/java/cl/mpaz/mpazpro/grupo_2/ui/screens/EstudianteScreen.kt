@@ -49,6 +49,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -62,6 +63,7 @@ import cl.mpaz.mpazpro.grupo_2.data.local.IntentoEntity
 import cl.mpaz.mpazpro.grupo_2.di.AppViewModelFactory
 import cl.mpaz.mpazpro.grupo_2.domain.model.Logros
 import cl.mpaz.mpazpro.grupo_2.domain.model.TipoActividad
+import cl.mpaz.mpazpro.grupo_2.ui.components.TagsPrueba
 import cl.mpaz.mpazpro.grupo_2.ui.components.AvatarCamara
 import cl.mpaz.mpazpro.grupo_2.ui.components.BarraSuperior
 import cl.mpaz.mpazpro.grupo_2.ui.theme.Azul
@@ -101,8 +103,10 @@ fun EstudianteScreen(
             item(span = { GridItemSpan(maxLineSpan) }) { TarjetaPermiso() }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = pestana == 0, onClick = { pestana = 0 }, label = { Text("📚 Mis materias") })
-                    FilterChip(selected = pestana == 1, onClick = { pestana = 1 }, label = { Text("🏆 Mis logros") })
+                    FilterChip(selected = pestana == 0, onClick = { pestana = 0 }, label = { Text("📚 Mis materias") },
+                        modifier = Modifier.testTag(TagsPrueba.ESTUDIANTE_MATERIAS))
+                    FilterChip(selected = pestana == 1, onClick = { pestana = 1 }, label = { Text("🏆 Mis logros") },
+                        modifier = Modifier.testTag(TagsPrueba.ESTUDIANTE_LOGROS))
                 }
             }
 
@@ -153,7 +157,8 @@ private fun Cabecera(nombre: String, medallas: Int, foto: Bitmap?, onFoto: (Bitm
         Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Azul, Violeta)))) {
             Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("¡Hola, $nombre! 👋", color = Color.White, style = MaterialTheme.typography.headlineSmall)
+                    Text("¡Hola, $nombre! 👋", color = Color.White, style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.testTag(TagsPrueba.ESTUDIANTE_SALUDO))
                     Text("3.º Básico · Escuela Marcela Paz", color = Color.White.copy(alpha = 0.85f))
                     Spacer(Modifier.size(4.dp))
                     Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.2f)) {

@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "preferencias")
 
-class PreferenciasDataStore(private val context: Context) {
+class PreferenciasDataStore(private val context: Context) : Preferencias {
 
     private val claveUsuario = stringPreferencesKey("usuario_recordado")
 
 
-    val usuarioRecordado: Flow<String> = context.dataStore.data.map { it[claveUsuario] ?: "" }
+    override val usuarioRecordado: Flow<String> = context.dataStore.data.map { it[claveUsuario] ?: "" }
 
-    suspend fun guardarUsuario(usuario: String) {
+    override suspend fun guardarUsuario(usuario: String) {
         context.dataStore.edit { it[claveUsuario] = usuario }
     }
 }

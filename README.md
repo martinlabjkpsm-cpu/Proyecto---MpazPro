@@ -54,8 +54,44 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 3. Usuarios de prueba: `utp01` / `docente01` (PIN 1234) · `est01` / `est02` (PIN 1111).
 
 ## Pruebas
-`./gradlew test` ejecuta 17 pruebas unitarias: validaciones de login, contenidos y preguntas, regla de una
-unidad por asignatura, cálculo de logros, revisión de respuestas y generación del CSV.
+Estrategia híbrida de la Guía 15: **Kotest** para la lógica, **MockK** para simular dependencias,
+**kotlinx-coroutines-test** para las corrutinas (`runTest` y `advanceUntilIdle`, sin `Thread.sleep`),
+**JUnit 5** como plataforma de los tests unitarios y **Compose UI Test** (ComposeTestRule + `testTag`) para la interfaz.
+
+- `./gradlew test` (carpeta `app/src/test`, sin emulador): 112 pruebas. Los ViewModel y el repositorio son los
+  reales; la base de datos es una base en memoria (`soporte/FakeDao.kt`) con los datos ficticios de la app y los
+  recursos nativos (voz, avisos, vibración, foto, CSV) y las preferencias son mocks de MockK (`soporte/Entorno.kt`).
+- `./gradlew connectedAndroidTest` (carpeta `app/src/androidTest`, con emulador o teléfono): base Room real,
+  recursos nativos reales y pruebas de interfaz con Compose. Los componentes probados tienen `testTag`
+  (`ui/components/TagsPrueba.kt`).
+
+| Caso de uso | Perfil | Clase de prueba | Herramientas |
+|---|---|---|---|
+| CU01 Iniciar y cerrar sesión según perfil, recordar usuario | Todos | `CU01IniciarSesionTest` | Kotest + MockK + coroutines-test |
+| | | `RutasPorPerfilTest` | JUnit 5 |
+| | | `LoginScreenTest`, `FlujoPorPerfilUiTest` (androidTest) | Compose UI Test + testTag |
+| CU02 Revisar contenidos y sus preguntas | UTP | `CU02UtpRevisaYAutorizaTest` | Kotest + coroutines-test |
+| CU03 Aprobar (autorizar) un contenido completo | UTP | `CU02UtpRevisaYAutorizaTest`, `FlujoPorPerfilUiTest` | Kotest + coroutines-test, Compose UI Test |
+| CU04 Rechazar con observación | UTP | `CU02UtpRevisaYAutorizaTest` | Kotest + coroutines-test |
+| CU05 Eliminar un contenido | UTP | `CU02UtpRevisaYAutorizaTest`, `MPazRepositoryTest` | Kotest + coroutines-test, MockK |
+| CU06 Proponer o corregir un contenido (una unidad por asignatura, vuelve a revisión UTP) | Docente | `CU06DocenteGestionaContenidoTest`, `ValidacionesTest`, `MPazRepositoryTest` | Kotest + coroutines-test, MockK |
+| CU07 Agregar y eliminar preguntas de desafío y prueba final | Docente | `CU06DocenteGestionaContenidoTest` | Kotest + coroutines-test |
+| CU08 Seleccionar objetivo, asignarlo y definir intentos (1 a 5) | Docente | `CU08DocenteAsignaActividadTest` | Kotest + coroutines-test |
+| CU09 Revisar informe: rendimiento, fortalezas y aspectos a reforzar | Docente | `CU09DocenteInformeTest`, `InformeCsvTest` | Kotest + coroutines-test |
+| CU10 Validar el informe (comentario, confirmación y fecha) | Docente | `CU09DocenteInformeTest` | Kotest + coroutines-test |
+| CU11 Descargar el informe CSV | Docente | `CU09DocenteInformeTest` | Kotest + MockK (exportador y Uri) |
+| | | `RecursosNativosTest` (androidTest) | JUnit + coroutines-test |
+| CU12 Consultar el material asignado (solo aprobado y asignado) | Estudiante | `CU12EstudianteMaterialYDesafiosTest` | Kotest + coroutines-test |
+| CU13 Desarrollar desafíos progresivos con retroalimentación | Estudiante | `CU12EstudianteMaterialYDesafiosTest` | Kotest + MockK + coroutines-test |
+| CU14 Rendir la prueba final dentro de los intentos permitidos | Estudiante | `CU14EstudiantePruebaFinalTest` | Kotest + coroutines-test |
+| CU15 Revisar respuestas correctas e incorrectas | Estudiante | `CU14EstudiantePruebaFinalTest`, `LogrosTest` | Kotest + coroutines-test |
+| CU16 Conservar el progreso y ver logros (estrellas y medallas) | Estudiante | `CU16ProgresoYLogrosTest`, `LogrosTest`, `MPazRepositoryTest` | Kotest + MockK + coroutines-test |
+| | | `BaseDeDatosRoomTest` (androidTest) | JUnit + coroutines-test |
+| CU17 Aviso al terminar, vibración, audio de apoyo y foto de perfil | Estudiante | `CU17ConfirmacionYAudioTest` | Kotest + MockK (verify) + coroutines-test |
+| | | `RecursosNativosTest` (androidTest) | JUnit + coroutines-test |
+| CU18 Datos ficticios: una unidad por asignatura y tres perfiles | Sistema | `CU16ProgresoYLogrosTest` | Kotest + coroutines-test |
+| Restricción: el estudiante no ve el informe ni edita contenidos | Estudiante | `CU12EstudianteMaterialYDesafiosTest`, `RutasPorPerfilTest` | Kotest, JUnit 5 |
+| | | `FlujoPorPerfilUiTest` (androidTest) | Compose UI Test + testTag |
 
 ## Planificación
 Trello: https://trello.com/b/MViVQnjK/tablero-mpaz-pro-3-basico

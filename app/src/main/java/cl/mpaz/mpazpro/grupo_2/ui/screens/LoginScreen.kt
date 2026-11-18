@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.mpaz.mpazpro.grupo_2.domain.model.Rol
 import cl.mpaz.mpazpro.grupo_2.ui.components.BotonPrincipal
 import cl.mpaz.mpazpro.grupo_2.ui.components.CampoValidado
+import cl.mpaz.mpazpro.grupo_2.ui.components.TagsPrueba
 import cl.mpaz.mpazpro.grupo_2.ui.theme.Verde
 import cl.mpaz.mpazpro.grupo_2.di.AppViewModelFactory
 import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.LoginViewModel
@@ -78,22 +80,27 @@ fun LoginScreen(
 
             Card(Modifier.widthIn(max = 480.dp).fillMaxWidth()) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    CampoValidado(estado.usuario, viewModel::onUsuarioCambia, "Usuario", Icons.Filled.Person, estado.errorUsuario)
-                    CampoValidado(estado.pin, viewModel::onPinCambia, "PIN (4 números)", Icons.Filled.Lock, estado.errorPin, esPin = true)
+                    CampoValidado(estado.usuario, viewModel::onUsuarioCambia, "Usuario", Icons.Filled.Person, estado.errorUsuario,
+                        modifier = Modifier.testTag(TagsPrueba.LOGIN_USUARIO))
+                    CampoValidado(estado.pin, viewModel::onPinCambia, "PIN (4 números)", Icons.Filled.Lock, estado.errorPin, esPin = true,
+                        modifier = Modifier.testTag(TagsPrueba.LOGIN_PIN))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = estado.recordar, onCheckedChange = viewModel::onRecordarCambia)
+                        Checkbox(checked = estado.recordar, onCheckedChange = viewModel::onRecordarCambia,
+                            modifier = Modifier.testTag(TagsPrueba.LOGIN_RECORDAR))
                         Text("Recordar mi usuario")
                     }
 
                     AnimatedVisibility(visible = estado.errorGeneral != null) {
-                        Text("⚠ ${estado.errorGeneral ?: ""}", color = MaterialTheme.colorScheme.error)
+                        Text("⚠ ${estado.errorGeneral ?: ""}", color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.testTag(TagsPrueba.LOGIN_ERROR))
                     }
                     AnimatedVisibility(visible = completo && estado.errorGeneral == null) {
                         Text("✓ Datos completos", color = Verde)
                     }
 
-                    BotonPrincipal("Entrar", viewModel::ingresar, cargando = estado.cargando)
+                    BotonPrincipal("Entrar", viewModel::ingresar, cargando = estado.cargando,
+                        modifier = Modifier.testTag(TagsPrueba.LOGIN_ENTRAR))
                 }
             }
             Text(
