@@ -1,8 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+}
+
+// Datos de la firma del APK release. Se leen de keystore.properties (en la raíz, no se sube a GitHub)
+val firma = Properties().apply {
+    val archivo = rootProject.file("keystore.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
 }
 
 android {
@@ -18,8 +26,17 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file(firma.getProperty("storeFile", "mpazpro-grupo2.jks"))
+            storePassword = firma.getProperty("storePassword")
+            keyAlias = firma.getProperty("keyAlias")
+            keyPassword = firma.getProperty("keyPassword")
+        }
+    }
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -58,6 +75,13 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
+
+    // API externa PokéAPI, igual que el ejemplo my-pokemon: Retrofit + Gson (OkHttp) y Coil para las imágenes
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)          // OkHttp 4 (caché HTTP e interceptor sin conexión)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // Tests unitarios (./gradlew test), sin emulador:
     // Kotest para la lógica, MockK para simular dependencias, coroutines-test para corrutinas y JUnit 5

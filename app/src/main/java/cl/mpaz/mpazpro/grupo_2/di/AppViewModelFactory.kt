@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import cl.mpaz.mpazpro.grupo_2.MPazApp
+import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.CompaneroViewModel
 import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.ContenidoFormViewModel
 import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.DocenteViewModel
 import cl.mpaz.mpazpro.grupo_2.ui.viewmodels.EstudianteViewModel
@@ -19,6 +20,7 @@ object AppViewModelFactory {
         initializer { DocenteViewModel(app().repositorio, app().exportador) }
         initializer { UtpViewModel(app().repositorio) }
         initializer { ContenidoFormViewModel(app().repositorio) }
+        initializer { CompaneroViewModel(app().pokemonRepository) }
     }
 }
 

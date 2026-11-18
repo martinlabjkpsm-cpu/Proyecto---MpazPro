@@ -25,7 +25,7 @@ MVP académico: todos los usuarios, respuestas y resultados son ficticios.
 - **Estudiante:** ve solo el material aprobado y asignado, resuelve desafíos de dificultad progresiva con
   retroalimentación y pista, rinde la prueba final dentro de los intentos permitidos y revisa sus respuestas
   correctas e incorrectas (la alternativa correcta se muestra al aprobar o al agotar los intentos).
-  Revisa sus logros con estrellas y medallas. El estudiante no tiene acceso al informe pedagógico.
+  Revisa sus logros con estrellas y medallas, y cada medalla le desbloquea un compañero Pokémon (API externa PokéAPI). El estudiante no tiene acceso al informe pedagógico.
 
 ## Próximas mejoras
 - Lectura en voz alta de la explicación de cada objetivo.
@@ -41,12 +41,24 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 - `nativo`: recursos del dispositivo
 - `di`: fábrica de ViewModels con sus dependencias
 
+## APIs
+| API | Método | Endpoint | Uso en la app |
+|---|---|---|---|
+| PokéAPI (externa) | GET | `https://pokeapi.co/api/v2/pokemon/{idOrName}` | Compañero Pokémon que se desbloquea con cada medalla |
+| Microservicio Spring Boot | _(completar)_ | `http://10.0.2.2:8080/...` | _(completar)_ |
+
+- Detalle de endpoints, arquitectura y APK firmado en [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
+
 ## Recursos nativos
 - **Vibración:** retroalimentación al acertar o fallar.
 - **Notificaciones:** aviso al terminar una actividad, con permiso en tiempo de ejecución (Android 13+).
 - **TextToSpeech:** lectura en voz alta de preguntas y alternativas.
 - **Almacenamiento (Storage Access Framework):** descarga del informe en CSV sin permisos de almacenamiento.
 - **Cámara:** foto de perfil del estudiante.
+
+## APK firmado
+- APK release firmado: `apk/app-release.apk` · llave: `mpazpro-grupo2.jks` _(agregar captura del APK y del .jks)_
+- Pasos para generarlo: sección 6 de [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
 
 ## Cómo ejecutar
 1. Clonar: `git clone https://github.com/martinlabjkpsm-cpu/Proyecto---MpazPro.git` y abrir con Android Studio (Ladybug o superior), JDK 17.
@@ -58,7 +70,7 @@ Estrategia híbrida de la Guía 15: **Kotest** para la lógica, **MockK** para s
 **kotlinx-coroutines-test** para las corrutinas (`runTest` y `advanceUntilIdle`, sin `Thread.sleep`),
 **JUnit 5** como plataforma de los tests unitarios y **Compose UI Test** (ComposeTestRule + `testTag`) para la interfaz.
 
-- `./gradlew test` (carpeta `app/src/test`, sin emulador): 112 pruebas. Los ViewModel y el repositorio son los
+- `./gradlew test` (carpeta `app/src/test`, sin emulador): 130 pruebas (112 de casos de uso y 18 de la API externa). Los ViewModel y el repositorio son los
   reales; la base de datos es una base en memoria (`soporte/FakeDao.kt`) con los datos ficticios de la app y los
   recursos nativos (voz, avisos, vibración, foto, CSV) y las preferencias son mocks de MockK (`soporte/Entorno.kt`).
 - `./gradlew connectedAndroidTest` (carpeta `app/src/androidTest`, con emulador o teléfono): base Room real,
@@ -90,6 +102,7 @@ Estrategia híbrida de la Guía 15: **Kotest** para la lógica, **MockK** para s
 | CU17 Aviso al terminar, vibración, audio de apoyo y foto de perfil | Estudiante | `CU17ConfirmacionYAudioTest` | Kotest + MockK (verify) + coroutines-test |
 | | | `RecursosNativosTest` (androidTest) | JUnit + coroutines-test |
 | CU18 Datos ficticios: una unidad por asignatura y tres perfiles | Sistema | `CU16ProgresoYLogrosTest` | Kotest + coroutines-test |
+| API externa PokéAPI: compañeros Pokémon por medallas, errores 404/500/sin internet | Estudiante | `PokemonRepositoryTest`, `CompaneroUiTest`, `CompaneroViewModelTest` | Kotest + coroutines-test + fakes |
 | Restricción: el estudiante no ve el informe ni edita contenidos | Estudiante | `CU12EstudianteMaterialYDesafiosTest`, `RutasPorPerfilTest` | Kotest, JUnit 5 |
 | | | `FlujoPorPerfilUiTest` (androidTest) | Compose UI Test + testTag |
 

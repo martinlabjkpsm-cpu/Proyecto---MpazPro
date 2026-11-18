@@ -66,6 +66,7 @@ import cl.mpaz.mpazpro.grupo_2.domain.model.TipoActividad
 import cl.mpaz.mpazpro.grupo_2.ui.components.TagsPrueba
 import cl.mpaz.mpazpro.grupo_2.ui.components.AvatarCamara
 import cl.mpaz.mpazpro.grupo_2.ui.components.BarraSuperior
+import cl.mpaz.mpazpro.grupo_2.ui.components.TarjetaCompanero
 import cl.mpaz.mpazpro.grupo_2.ui.theme.Azul
 import cl.mpaz.mpazpro.grupo_2.ui.theme.Verde
 import cl.mpaz.mpazpro.grupo_2.ui.theme.Violeta
@@ -128,6 +129,8 @@ fun EstudianteScreen(
                     )
                 }
             } else {
+                // Premio con la API externa PokeAPI: cada medalla desbloquea un compañero
+                item(span = { GridItemSpan(maxLineSpan) }) { TarjetaCompanero(viewModel.medallas(intentos)) }
                 val conAvance = contenidos.filter { c -> intentos.any { it.contenidoId == c.id } }
                 if (conAvance.isEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {

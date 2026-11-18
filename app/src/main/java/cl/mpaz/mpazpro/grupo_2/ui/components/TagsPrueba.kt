@@ -24,4 +24,8 @@ object TagsPrueba {
     const val UTP_RECHAZAR = "utp_rechazar"
 
     const val CAMPO_ERROR = "campo_error"
+
+    const val COMPANERO_TARJETA = "companero_tarjeta"
+    const val COMPANERO_NOMBRE = "companero_nombre"
+    const val COMPANERO_ERROR = "companero_error"
 }

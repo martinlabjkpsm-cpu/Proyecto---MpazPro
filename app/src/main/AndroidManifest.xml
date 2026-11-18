@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
 
+    <!-- Internet: API externa (PokéAPI) y microservicios Spring Boot.
+         usesCleartextTraffic permite http:// hacia el microservicio en el PC (10.0.2.2 en el emulador) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -25,6 +29,7 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.MpazPro">
         <activity
             android:name=".MainActivity"
