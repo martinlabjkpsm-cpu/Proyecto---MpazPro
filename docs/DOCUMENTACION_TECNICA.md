@@ -93,6 +93,8 @@ Pruebas de la API externa (`app/src/test/.../apiexterna`), con clases falsas com
 | `CompaneroUiTest` | Conversión a lo que se muestra (título, imagen, tipos en español, cm/kg), datos faltantes y desbloqueo por medallas. |
 | `CompaneroViewModelTest` | Loading → Success / Error, Reintentar, nuevo compañero al ganar medalla, sin llamadas repetidas y última elección gana. Usa `FakePokemonRepository`. |
 
+| `TarjetaCompaneroTest` (androidTest) | La tarjeta muestra el compañero y sus medidas; sin internet muestra el error y Reintentar lo carga. |
+
 Cobertura: en Android Studio, clic derecho en `app/src/test` → **Run 'Tests in…' with Coverage**.
 Todas las pruebas unitarias usan JUnit 5 (Kotest), así que no hace falta `junit-vintage-engine`.
 

@@ -34,7 +34,9 @@ MVP académico: todos los usuarios, respuestas y resultados son ficticios.
 ## Arquitectura
 MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2` (grupo 2):
 - `data/local`: Room (usuarios, contenidos, preguntas, intentos, respuestas) y DataStore
-- `data/repository`: acceso centralizado a los datos
+- `data/remote`: Retrofit para la API externa PokéAPI (`ApiService`, `RetrofitInstance`, caché sin conexión)
+- `data/repository`: acceso centralizado a los datos (Room y PokéAPI)
+- `model`: clases del JSON de PokéAPI (Gson), igual que el ejemplo `my-pokemon` del docente
 - `domain/model`: modelos y reglas (logros, informe, revisión, estados de formularios)
 - `ui/screens` y `ui/viewmodels`: vistas en Compose y su estado con StateFlow
 - `utils`: validaciones desacopladas de la interfaz y formato de fechas
@@ -45,7 +47,7 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 | API | Método | Endpoint | Uso en la app |
 |---|---|---|---|
 | PokéAPI (externa) | GET | `https://pokeapi.co/api/v2/pokemon/{idOrName}` | Compañero Pokémon que se desbloquea con cada medalla |
-| Microservicio Spring Boot | _(completar)_ | `http://10.0.2.2:8080/...` | _(completar)_ |
+| Microservicio Spring Boot | _(pendiente)_ | `http://10.0.2.2:8080/...` | _(pendiente)_ |
 
 - Detalle de endpoints, arquitectura y APK firmado en [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
 
@@ -57,7 +59,11 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 - **Cámara:** foto de perfil del estudiante.
 
 ## APK firmado
-- APK release firmado: `apk/app-release.apk` · llave: `mpazpro-grupo2.jks` _(agregar captura del APK y del .jks)_
+- APK release firmado: [`apk/app-release.apk`](apk/app-release.apk)
+- Llave: [`mpazpro-grupo2.jks`](mpazpro-grupo2.jks) · configuración: `signingConfigs` en `app/build.gradle.kts`
+
+![APK firmado](docs/capturas/apk-firmado.png)
+![Llave .jks](docs/capturas/llave-jks.png)
 - Pasos para generarlo: sección 6 de [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
 
 ## Cómo ejecutar
@@ -103,6 +109,7 @@ Estrategia híbrida de la Guía 15: **Kotest** para la lógica, **MockK** para s
 | | | `RecursosNativosTest` (androidTest) | JUnit + coroutines-test |
 | CU18 Datos ficticios: una unidad por asignatura y tres perfiles | Sistema | `CU16ProgresoYLogrosTest` | Kotest + coroutines-test |
 | API externa PokéAPI: compañeros Pokémon por medallas, errores 404/500/sin internet | Estudiante | `PokemonRepositoryTest`, `CompaneroUiTest`, `CompaneroViewModelTest` | Kotest + coroutines-test + fakes |
+| | | `TarjetaCompaneroTest` (androidTest) | Compose UI Test + testTag |
 | Restricción: el estudiante no ve el informe ni edita contenidos | Estudiante | `CU12EstudianteMaterialYDesafiosTest`, `RutasPorPerfilTest` | Kotest, JUnit 5 |
 | | | `FlujoPorPerfilUiTest` (androidTest) | Compose UI Test + testTag |
 
