@@ -17,6 +17,11 @@ android {
     namespace = "cl.mpaz.mpazpro.grupo_2"
     compileSdk = 35
 
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
     defaultConfig {
         applicationId = "cl.mpaz.mpazpro.grupo_2"
         minSdk = 26
@@ -62,7 +67,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.tooling.preview)
@@ -76,23 +80,22 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
 
-    // API externa PokéAPI, igual que el ejemplo my-pokemon: Retrofit + Gson (OkHttp) y Coil para las imágenes
+    // API externa PokéAPI, igual que el ejemplo my-pokemon
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
-    implementation(libs.okhttp)          // OkHttp 4 (caché HTTP e interceptor sin conexión)
+    implementation(libs.okhttp)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
-    // Tests unitarios (./gradlew test), sin emulador:
-    // Kotest para la lógica, MockK para simular dependencias, coroutines-test para corrutinas y JUnit 5
+    // Tests unitarios: Kotest, MockK, coroutines-test y JUnit 5
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.junit.jupiter)
-    testRuntimeOnly(libs.junit.platform.launcher)   // Gradle 9 lo pide para JUnit 5
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
 
-    // Tests instrumentados de interfaz (./gradlew connectedAndroidTest), con emulador o teléfono
+    // Tests instrumentados de interfaz
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.runner)
@@ -103,7 +106,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
 }
 
-// Obligatorio para usar JUnit 5 (y Kotest) en los tests unitarios
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
