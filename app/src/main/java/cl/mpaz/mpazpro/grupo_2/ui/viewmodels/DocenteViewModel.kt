@@ -37,6 +37,11 @@ class DocenteViewModel(
     val contenidos: StateFlow<List<ContenidoEntity>> = repo.contenidos()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Pide al servidor los datos más recientes (la pantalla lo llama cada vez que se abre). */
+    fun refrescar() {
+        viewModelScope.launch { repo.sincronizar() }
+    }
+
     private var seleccionado: ContenidoEntity? = null
 
 
@@ -91,6 +96,7 @@ class DocenteViewModel(
 
     fun cargarInforme(contenidoId: Int) {
         viewModelScope.launch {
+            repo.sincronizar()   // trae los intentos que los estudiantes rindieron en otros teléfonos
             val c = repo.contenido(contenidoId) ?: return@launch
             seleccionado = c
             val preguntas = repo.preguntas(contenidoId, TipoActividad.PRUEBA)

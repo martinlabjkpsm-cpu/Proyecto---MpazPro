@@ -47,6 +47,11 @@ class EstudianteViewModel(
     val intentos: StateFlow<List<IntentoEntity>> = repo.intentosDe(estudianteId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Pide al servidor los datos más recientes (la pantalla lo llama cada vez que se abre). */
+    fun refrescar() {
+        viewModelScope.launch { repo.sincronizar() }
+    }
+
 
     fun desafioHecho(contenidoId: Int, intentos: List<IntentoEntity>) =
         intentos.any { it.contenidoId == contenidoId && it.tipo == TipoActividad.DESAFIO }

@@ -69,11 +69,44 @@ Retrofit 2.11 + Gson, OkHttp 4.12 (caché HTTP), Coil 3 (imágenes), corrutinas.
 
 | Dato | Valor |
 |---|---|
-| Repositorio | _(completar)_ |
-| URL base | `http://10.0.2.2:8080/` desde el emulador (es el `localhost` del PC) |
-| Endpoints | _(completar)_ |
+| Código | proyecto `mpazpro-microservicios` _(agregar su ubicación o enlace en GitHub)_ |
+| Tecnología | Java 21 · Spring Boot 4.1 · Spring Data JPA · PostgreSQL (base `mpazpro` en el RDS o local) |
+| Servidor | Instancia EC2 `mpazpro-api` (Ubuntu, AWS) con IP elástica `184.197.243.37`; cada microservicio es un servicio `systemd` que arranca solo |
+| Base de datos | `mpazpro` en el RDS PostgreSQL (`gotita-db`), separada de la base de Gotita |
+| ms-contenidos | `http://184.197.243.37:8080/api/v1/` — contenidos y preguntas (Swagger: `http://184.197.243.37:8080/swagger-ui.html`) |
+| ms-resultados | `http://184.197.243.37:8081/api/v1/` — intentos y respuestas (Swagger: `http://184.197.243.37:8081/swagger-ui.html`) |
 
-La app ya tiene el permiso `INTERNET` y `android:usesCleartextTraffic="true"` para llamar por `http://` al PC.
+| Microservicio | Método | Endpoint | Quién lo usa en la app |
+|---|---|---|---|
+| ms-contenidos | GET | `/contenidos` | Todos, al iniciar sesión (sincronización) |
+| | POST | `/contenidos` | Docente: crear contenido |
+| | PUT | `/contenidos/{id}` | Docente: editar, asignar, intentos, validar informe · UTP: aprobar o rechazar |
+| | DELETE | `/contenidos/{id}` | UTP: eliminar contenido (y sus preguntas) |
+| | GET | `/contenidos/{id}/preguntas` | Todos, al iniciar sesión |
+| | POST | `/contenidos/{id}/preguntas` | Docente: agregar pregunta |
+| | DELETE | `/preguntas/{id}` | Docente: eliminar pregunta |
+| ms-resultados | GET | `/intentos` | Todos, al iniciar sesión (el docente ve los intentos de todos los estudiantes) |
+| | POST | `/intentos` | Estudiante: guardar desafío o prueba final con sus respuestas |
+
+**Cómo se integra (MVVM):** los ViewModels no cambiaron. `MPazRepository` recibe `ContenidosApi` y `ResultadosApi`
+(Retrofit, carpeta `data/remote/microservicios`) además del DAO de Room:
+
+1. **Iniciar sesión y abrir cada pantalla principal → `sincronizar()`** (datos "en tiempo real"): descarga contenidos,
+   preguntas e intentos y actualiza Room. Primero descarga todo y recién después escribe, así un error no deja la app vacía.
+   El informe del docente también sincroniza antes de calcularse, para incluir intentos rendidos en otros teléfonos.
+2. **Cada cambio** (crear, editar, aprobar, eliminar, guardar intento) va primero al microservicio y después a Room,
+   con el id que asignó el servidor (`@Insert(onConflict = REPLACE)` en `AppDao`).
+3. **Las pantallas leen siempre de Room** con Flow, por eso se actualizan solas.
+4. **Sin conexión:** si el microservicio no responde (IOException o error HTTP), `intentar { }` devuelve null y el
+   cambio se guarda solo en Room. `repositorio.enLinea` indica si la última llamada funcionó.
+
+Tiempos de espera cortos (3 s para conectar) en `RetrofitMicroservicios`, para que la app no se quede esperando
+si los microservicios están apagados. La dirección está en `IP_SERVIDOR` (184.197.243.37); para usarlos en el PC con el
+emulador, cambiar por `IP_PC_DESDE_EMULADOR` (10.0.2.2).
+
+Pruebas: `microservicios/MicroserviciosRepositoryTest` (Kotest + MockK + FakeDao): sincronización, CRUD de contenidos
+y preguntas, intentos, modo sin conexión y conversiones entre Room y el JSON. `microservicios/RefrescoPantallasTest`:
+las pantallas del docente, la UTP, el estudiante y el informe vuelven a pedir los datos al servidor al abrirse.
 
 ## 5. Pruebas unitarias
 

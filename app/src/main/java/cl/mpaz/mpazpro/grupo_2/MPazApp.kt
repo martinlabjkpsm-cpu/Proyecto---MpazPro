@@ -5,6 +5,7 @@ import cl.mpaz.mpazpro.grupo_2.data.local.AppDatabase
 import cl.mpaz.mpazpro.grupo_2.data.local.DatosIniciales
 import cl.mpaz.mpazpro.grupo_2.data.local.PreferenciasDataStore
 import cl.mpaz.mpazpro.grupo_2.data.remote.RetrofitInstance
+import cl.mpaz.mpazpro.grupo_2.data.remote.microservicios.RetrofitMicroservicios
 import cl.mpaz.mpazpro.grupo_2.data.repository.DefaultPokemonRepository
 import cl.mpaz.mpazpro.grupo_2.data.repository.MPazRepository
 import cl.mpaz.mpazpro.grupo_2.data.repository.PokemonRepository
@@ -37,7 +38,13 @@ class MPazApp : Application() {
     override fun onCreate() {
         super.onCreate()
         val db = AppDatabase.obtener(this)
-        repositorio = MPazRepository(db.dao(), PreferenciasDataStore(this))
+        // Room + DataStore + microservicios Spring Boot (ms-contenidos :8080 y ms-resultados :8081)
+        repositorio = MPazRepository(
+            db.dao(),
+            PreferenciasDataStore(this),
+            RetrofitMicroservicios.contenidosApi(),
+            RetrofitMicroservicios.resultadosApi()
+        )
         vibracion = Vibracion(this)
         notificaciones = Notificaciones(this)
         notificaciones.crearCanal()

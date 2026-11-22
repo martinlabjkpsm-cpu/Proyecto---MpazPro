@@ -35,7 +35,8 @@ MVP académico: todos los usuarios, respuestas y resultados son ficticios.
 MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2` (grupo 2):
 - `data/local`: Room (usuarios, contenidos, preguntas, intentos, respuestas) y DataStore
 - `data/remote`: Retrofit para la API externa PokéAPI (`ApiService`, `RetrofitInstance`, caché sin conexión)
-- `data/repository`: acceso centralizado a los datos (Room y PokéAPI)
+- `data/remote/microservicios`: Retrofit para los microservicios propios (`ContenidosApi`, `ResultadosApi`, `RetrofitMicroservicios`)
+- `data/repository`: acceso centralizado a los datos (Room, microservicios y PokéAPI)
 - `model`: clases del JSON de PokéAPI (Gson), igual que el ejemplo `my-pokemon` del docente
 - `domain/model`: modelos y reglas (logros, informe, revisión, estados de formularios)
 - `ui/screens` y `ui/viewmodels`: vistas en Compose y su estado con StateFlow
@@ -47,7 +48,17 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 | API | Método | Endpoint | Uso en la app |
 |---|---|---|---|
 | PokéAPI (externa) | GET | `https://pokeapi.co/api/v2/pokemon/{idOrName}` | Compañero Pokémon que se desbloquea con cada medalla |
-| Microservicio Spring Boot | _(pendiente)_ | `http://10.0.2.2:8080/...` | _(pendiente)_ |
+| ms-contenidos (propio, Spring Boot) | GET · POST | `http://184.197.243.37:8080/api/v1/contenidos` | Listar y crear contenidos (docente) |
+| | PUT · DELETE | `http://184.197.243.37:8080/api/v1/contenidos/{id}` | Editar, aprobar o rechazar (UTP), asignar y validar informe, eliminar |
+| | GET · POST | `http://184.197.243.37:8080/api/v1/contenidos/{id}/preguntas` | Preguntas de desafío y prueba final |
+| | DELETE | `http://184.197.243.37:8080/api/v1/preguntas/{id}` | Eliminar una pregunta |
+| ms-resultados (propio, Spring Boot) | GET · POST | `http://184.197.243.37:8081/api/v1/intentos` | Intentos del estudiante con sus respuestas (informe del docente) |
+
+**Microservicios propios:** proyecto `mpazpro-microservicios` (Spring Boot 4.1 + PostgreSQL), publicados en la instancia EC2
+`mpazpro-api` de AWS (IP elástica `184.197.243.37`) y conectados a la base `mpazpro` del RDS. Al iniciar sesión y cada vez que se
+abre una pantalla principal, la app descarga contenidos, preguntas e intentos y los guarda en Room; cada cambio se envía primero al microservicio y luego se
+guarda en Room con el id del servidor. Si los microservicios no responden, la app sigue funcionando solo con Room.
+Código: `data/remote/microservicios` (Retrofit) y `data/repository/MPazRepository.kt`.
 
 - Detalle de endpoints, arquitectura y APK firmado en [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
 
@@ -59,7 +70,7 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 - **Cámara:** foto de perfil del estudiante.
 
 ## APK firmado
-- APK release firmado: [`apk/app-release.apk`](apk/app-release.apk)
+- APK release firmado: [`app/release/app-release.apk`](app/release/app-release.apk)
 - Llave: [`mpazpro-grupo2.jks`](mpazpro-grupo2.jks) · configuración: `signingConfigs` en `app/build.gradle.kts`
 
 ![APK firmado](docs/capturas/apk-firmado.png)
@@ -67,6 +78,16 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 - Pasos para generarlo: sección 6 de [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
 
 ## Cómo ejecutar
+
+**Microservicios (backend).** Ya están publicados en AWS y arrancan solos con la instancia:
+1. Iniciar el laboratorio de AWS Academy (enciende la EC2 `mpazpro-api` y el RDS).
+2. Comprobar que responden: `http://184.197.243.37:8080/api/v1/estado` y `http://184.197.243.37:8081/api/v1/estado`
+   (Swagger: `http://184.197.243.37:8080/swagger-ui.html` y `http://184.197.243.37:8081/swagger-ui.html`).
+3. Para ejecutarlos en un PC (respaldo): crear la base `mpazpro` en PostgreSQL, definir `DB_URL`, `DB_USER` y `DB_PASSWORD`,
+   ejecutar `./mvnw spring-boot:run` en `ms-contenidos` y en `ms-resultados`, y en la app cambiar `IP_SERVIDOR` por
+   `IP_PC_DESDE_EMULADOR` en `data/remote/microservicios/RetrofitMicroservicios.kt`. Detalle en el README de `mpazpro-microservicios`.
+
+**App Android.**
 1. Clonar: `git clone https://github.com/martinlabjkpsm-cpu/Proyecto---MpazPro.git` y abrir con Android Studio (Ladybug o superior), JDK 17.
 2. Sincronizar Gradle y ejecutar en un emulador o dispositivo con Android 8.0 (API 26) o superior.
 3. Usuarios de prueba: `utp01` / `docente01` (PIN 1234) · `est01` / `est02` (PIN 1111).
@@ -76,22 +97,23 @@ Estrategia híbrida de la Guía 15: **Kotest** para la lógica, **MockK** para s
 **kotlinx-coroutines-test** para las corrutinas (`runTest` y `advanceUntilIdle`, sin `Thread.sleep`),
 **JUnit 5** como plataforma de los tests unitarios y **Compose UI Test** (ComposeTestRule + `testTag`) para la interfaz.
 
-- `./gradlew test` (carpeta `app/src/test`, sin emulador): 130 pruebas (112 de casos de uso y 18 de la API externa). Los ViewModel y el repositorio son los
+- `./gradlew test` (carpeta `app/src/test`, sin emulador): 147 pruebas (casos de uso, lógica, API externa y 18 de la integración con los microservicios). Los ViewModel y el repositorio son los
   reales; la base de datos es una base en memoria (`soporte/FakeDao.kt`) con los datos ficticios de la app y los
   recursos nativos (voz, avisos, vibración, foto, CSV) y las preferencias son mocks de MockK (`soporte/Entorno.kt`).
 - `./gradlew connectedAndroidTest` (carpeta `app/src/androidTest`, con emulador o teléfono): base Room real,
   recursos nativos reales y pruebas de interfaz con Compose. Los componentes probados tienen `testTag`
   (`ui/components/TagsPrueba.kt`).
 
-  ### Cobertura de pruebas
-Se ejecutaron 129 pruebas unitarias (todas aprobadas). El 80 % se mide sobre la lógica de la app:
+### Cobertura de pruebas
+Se ejecutaron 147 pruebas unitarias, todas aprobadas (medición del 22-11-2026 con *Run 'Tests' with Coverage* en Android Studio).
+El encargo pide al menos 80 % de la lógica (ViewModel o Repository):
 
-| Módulo | Cobertura de líneas |
-|---|---|
-| ViewModels | 97 % |
-| Repository | 100 % |
-| Domain model | 100 % |
-| Utils | 100 % |
+| Módulo | Cobertura de líneas | Cobertura de ramas |
+|---|---|---|
+| ViewModels (`ui/viewmodels`) | 98 % (208/212) | 80 % |
+| Repository (`data/repository`) | 100 % (95/95) | 94 % |
+| Conexión con los microservicios (`data/remote/microservicios`) | 82 % (72/87) | 94 % |
+| **Lógica total (ViewModels + Repository)** | **99 % (303/307)** | |
 
 Las pantallas Compose se prueban aparte con Compose UI Test (androidTest).
 <img width="2056" height="1594" alt="image" src="https://github.com/user-attachments/assets/4b3c6090-22a8-4e3f-bfad-ea0c90ea283e" />

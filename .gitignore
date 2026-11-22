@@ -18,3 +18,6 @@ local.properties
 
 # Contraseñas de la firma del APK (el .jks y el APK sí se suben, lo pide el encargo)
 keystore.properties
+
+# Registros locales del compilador de Kotlin
+.kotlin/

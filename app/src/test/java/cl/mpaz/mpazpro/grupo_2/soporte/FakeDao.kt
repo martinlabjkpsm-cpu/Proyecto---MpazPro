@@ -117,4 +117,50 @@ class FakeDao : AppDao {
 
     override suspend fun contarIntentosPrueba(estudianteId: Int, contenidoId: Int): Int =
         intentos.value.count { it.estudianteId == estudianteId && it.contenidoId == contenidoId && it.tipo.name == "PRUEBA" }
+
+    // ---- sincronización con los microservicios (REPLACE: el id del servidor reemplaza la fila) ----
+    override suspend fun guardarContenido(contenido: ContenidoEntity): Long {
+        val fila = if (contenido.id == 0) contenido.copy(id = sigContenido++) else contenido
+        sigContenido = maxOf(sigContenido, fila.id + 1)
+        contenidos.value = contenidos.value.filter { it.id != fila.id } + fila
+        return fila.id.toLong()
+    }
+
+    override suspend fun guardarContenidos(contenidos: List<ContenidoEntity>) {
+        contenidos.forEach { guardarContenido(it) }
+    }
+
+    override suspend fun guardarPregunta(pregunta: PreguntaEntity): Long {
+        val fila = if (pregunta.id == 0) pregunta.copy(id = sigPregunta++) else pregunta
+        sigPregunta = maxOf(sigPregunta, fila.id + 1)
+        preguntas.removeAll { it.id == fila.id }
+        preguntas += fila
+        return fila.id.toLong()
+    }
+
+    override suspend fun guardarPreguntas(preguntas: List<PreguntaEntity>) {
+        preguntas.forEach { guardarPregunta(it) }
+    }
+
+    override suspend fun guardarIntentos(intentos: List<IntentoEntity>) {
+        intentos.forEach { i ->
+            val fila = if (i.id == 0) i.copy(id = sigIntento++) else i
+            sigIntento = maxOf(sigIntento, fila.id + 1)
+            this.intentos.value = this.intentos.value.filter { it.id != fila.id } + fila
+        }
+    }
+
+    override suspend fun guardarRespuestas(respuestas: List<RespuestaEntity>) {
+        respuestas.forEach { r ->
+            val fila = if (r.id == 0) r.copy(id = sigRespuesta++) else r
+            sigRespuesta = maxOf(sigRespuesta, fila.id + 1)
+            this.respuestas.removeAll { it.id == fila.id }
+            this.respuestas += fila
+        }
+    }
+
+    override suspend fun borrarContenidosExcepto(ids: List<Int>) { contenidos.value = contenidos.value.filter { it.id in ids } }
+    override suspend fun borrarPreguntasExcepto(ids: List<Int>) { preguntas.removeAll { it.id !in ids } }
+    override suspend fun borrarIntentosExcepto(ids: List<Int>) { intentos.value = intentos.value.filter { it.id in ids } }
+    override suspend fun borrarRespuestasExcepto(ids: List<Int>) { respuestas.removeAll { it.id !in ids } }
 }

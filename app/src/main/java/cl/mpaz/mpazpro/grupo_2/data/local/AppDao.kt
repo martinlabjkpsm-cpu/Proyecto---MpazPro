@@ -3,6 +3,7 @@ package cl.mpaz.mpazpro.grupo_2.data.local
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
@@ -81,4 +82,38 @@ interface AppDao {
 
     @Query("SELECT COUNT(*) FROM intentos WHERE estudianteId = :estudianteId AND contenidoId = :contenidoId AND tipo = 'PRUEBA'")
     suspend fun contarIntentosPrueba(estudianteId: Int, contenidoId: Int): Int        // R
+
+    // ---------- Sincronización con los microservicios ----------
+    // REPLACE: si ya existe una fila con ese id (el id que asignó el servidor), la reemplaza.
+    // borrarXExcepto: quita lo que el servidor ya no tiene, sin vaciar la tabla (la lista no parpadea).
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardarContenido(contenido: ContenidoEntity): Long                    // C/U
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardarContenidos(contenidos: List<ContenidoEntity>)                  // C/U
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardarPregunta(pregunta: PreguntaEntity): Long                       // C/U
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardarPreguntas(preguntas: List<PreguntaEntity>)                     // C/U
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardarIntentos(intentos: List<IntentoEntity>)                        // C/U
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardarRespuestas(respuestas: List<RespuestaEntity>)                  // C/U
+
+    @Query("DELETE FROM contenidos WHERE id NOT IN (:ids)")
+    suspend fun borrarContenidosExcepto(ids: List<Int>)
+
+    @Query("DELETE FROM preguntas WHERE id NOT IN (:ids)")
+    suspend fun borrarPreguntasExcepto(ids: List<Int>)
+
+    @Query("DELETE FROM intentos WHERE id NOT IN (:ids)")
+    suspend fun borrarIntentosExcepto(ids: List<Int>)
+
+    @Query("DELETE FROM respuestas WHERE id NOT IN (:ids)")
+    suspend fun borrarRespuestasExcepto(ids: List<Int>)
 }

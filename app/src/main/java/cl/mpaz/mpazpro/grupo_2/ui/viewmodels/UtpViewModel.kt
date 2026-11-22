@@ -23,6 +23,11 @@ class UtpViewModel(private val repo: MPazRepository) : ViewModel() {
     val contenidos: StateFlow<List<ContenidoEntity>> = repo.contenidos()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Pide al servidor los datos más recientes (la pantalla lo llama cada vez que se abre). */
+    fun refrescar() {
+        viewModelScope.launch { repo.sincronizar() }
+    }
+
     private val _revision = MutableStateFlow(RevisionEstado())
     val revision: StateFlow<RevisionEstado> = _revision.asStateFlow()
 
