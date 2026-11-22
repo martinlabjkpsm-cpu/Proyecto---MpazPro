@@ -69,7 +69,7 @@ Retrofit 2.11 + Gson, OkHttp 4.12 (caché HTTP), Coil 3 (imágenes), corrutinas.
 
 | Dato | Valor |
 |---|---|
-| Código | proyecto `mpazpro-microservicios` _(agregar su ubicación o enlace en GitHub)_ |
+| Código | Repositorio https://github.com/martinlabjkpsm-cpu/mpazpro-api (ms-contenidos y ms-resultados) |
 | Tecnología | Java 21 · Spring Boot 4.1 · Spring Data JPA · PostgreSQL (base `mpazpro` en el RDS o local) |
 | Servidor | Instancia EC2 `mpazpro-api` (Ubuntu, AWS) con IP elástica `184.197.243.37`; cada microservicio es un servicio `systemd` que arranca solo |
 | Base de datos | `mpazpro` en el RDS PostgreSQL (`gotita-db`), separada de la base de Gotita |
