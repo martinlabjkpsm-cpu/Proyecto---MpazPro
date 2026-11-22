@@ -59,7 +59,8 @@ MVVM con separación por capas, todo dentro del paquete `cl.mpaz.mpazpro.grupo_2
 abre una pantalla principal, la app descarga contenidos, preguntas e intentos y los guarda en Room; cada cambio se envía primero al microservicio y luego se
 guarda en Room con el id del servidor. Si los microservicios no responden, la app sigue funcionando solo con Room.
 Código: `data/remote/microservicios` (Retrofit) y `data/repository/MPazRepository.kt`.
-
+- Repositorio de los microservicios (backend Spring Boot: ms-contenidos y ms-resultados): https://github.com/martinlabjkpsm-cpu/mpazpro-api
+- 
 - Detalle de endpoints, arquitectura y APK firmado en [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
 
 ## Recursos nativos
@@ -71,19 +72,15 @@ Código: `data/remote/microservicios` (Retrofit) y `data/repository/MPazReposito
 
 ## APK firmado
 - APK release firmado: [`app/release/app-release.apk`](app/release/app-release.apk)
-- Llave: [`mpazpro-grupo2.jks`](mpazpro-grupo2.jks) · configuración: `signingConfigs` en `app/build.gradle.kts`
-
-![APK firmado](docs/capturas/apk-firmado.png)
-![Llave .jks](docs/capturas/llave-jks.png)
+- Llave: mpazpro-grupo2.jks (alias mpazpro). No se sube al repositorio por seguridad; se entrega aparte al docente. Configuración: `signingConfigs` en `app/build.gradle.kts`
 - Pasos para generarlo: sección 6 de [docs/DOCUMENTACION_TECNICA.md](docs/DOCUMENTACION_TECNICA.md).
+
 
 ## Cómo ejecutar
 
 **Microservicios (backend).** Ya están publicados en AWS y arrancan solos con la instancia:
 1. Iniciar el laboratorio de AWS Academy (enciende la EC2 `mpazpro-api` y el RDS).
-2. Comprobar que responden: `http://184.197.243.37:8080/api/v1/estado` y `http://184.197.243.37:8081/api/v1/estado`
-   (Swagger: `http://184.197.243.37:8080/swagger-ui.html` y `http://184.197.243.37:8081/swagger-ui.html`).
-3. Para ejecutarlos en un PC (respaldo): crear la base `mpazpro` en PostgreSQL, definir `DB_URL`, `DB_USER` y `DB_PASSWORD`,
+2. Para ejecutarlos en un PC (respaldo): crear la base `mpazpro` en PostgreSQL, definir `DB_URL`, `DB_USER` y `DB_PASSWORD`,
    ejecutar `./mvnw spring-boot:run` en `ms-contenidos` y en `ms-resultados`, y en la app cambiar `IP_SERVIDOR` por
    `IP_PC_DESDE_EMULADOR` en `data/remote/microservicios/RetrofitMicroservicios.kt`. Detalle en el README de `mpazpro-microservicios`.
 
